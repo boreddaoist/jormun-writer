@@ -38,7 +38,6 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onDoc))
       <button class="tb" :class="{ on: formats.h1 }" title="Heading 1" @click="emit('action', 'h1')">H1</button>
       <button class="tb" :class="{ on: formats.h2 }" title="Heading 2" @click="emit('action', 'h2')">H2</button>
       <button class="tb" :class="{ on: formats.h3 }" title="Heading 3" @click="emit('action', 'h3')">H3</button>
-      <button class="tb" :class="{ on: formats.quote }" title="Quote" @click="emit('action', 'quote')">“</button>
       <button class="tb" :class="{ on: formats.bullet }" title="Bulleted list" @click="emit('action', 'bullet')">•</button>
       <button class="tb wide" title="Scene break" @click="emit('action', 'scene')">* * *</button>
     </div>
