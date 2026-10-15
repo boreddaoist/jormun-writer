@@ -98,7 +98,7 @@ removes the whole span; Backspace right after a note's passage deletes that note
 If you ever want to see the marks, **Aa → Show formatting marks** reveals the ones under the cursor.
 
 - **Toolbar:** undo/redo, **B**old, *I*talic, ~~S~~trike, H1/H2/H3, bullet list, scene break (`* * *`),
-  **Aa** (font, size, spacing). The B / I / S / H1 / H2 / H3 / quote / bullet
+  **Aa** (font, size, spacing). The B / I / S / H1 / H2 / H3 / bullet
   buttons light up when your cursor is in that format. Selecting text wraps only the words, never the spaces around them. With nothing selected: a caret inside a word formats that word; at the edge of a word or on an empty spot, B / I / S switch the format on for what you type next (nothing visible appears, and it is dropped again if you move away without typing). Press the button again at the end of what you typed to step out of the format. Italic on bold text gives ***both***, and each can be switched off on its own. A heading, quote and bullet replace each other on a line instead of stacking.
 - **Right-click** in the editor: on selected text, **Add note to selection…**; on a passage that already has a note,
   **Edit note** and **Resolve note**. Below that: spelling suggestions (and
