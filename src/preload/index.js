@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('jormun', {
   writeFile: (rel, text) => ipcRenderer.invoke('file:write', rel, text),
   createFile: (rel, text) => ipcRenderer.invoke('file:create', rel, text),
   closeNow: () => ipcRenderer.invoke('app:close-now'),
+  openKofi: () => ipcRenderer.invoke('app:kofi'),
   revealProject: () => ipcRenderer.invoke('project:reveal'),
   fileMenu: (kind, info) => ipcRenderer.invoke('ctx:file', kind, info),
   onEditorAction: (cb) => {

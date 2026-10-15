@@ -8,6 +8,7 @@ import { createProject } from './scaffold.js'
 import { mergeManuscript, copyProject } from './manage.js'
 import { buildDocx, buildMarkdown } from './exporter.js'
 import aiInstructions from '../../docs/AI-INSTRUCTIONS.md?raw'
+import appIcon from '../../build/icon.png?asset'
 
 // Dev/QA only: run with a throwaway settings folder so tests never touch the real preferences.
 if (process.env.JORMUN_USER_DATA) app.setPath('userData', process.env.JORMUN_USER_DATA)
@@ -60,6 +61,7 @@ async function openProject(dir) {
 
 function createWindow() {
   win = new BrowserWindow({
+    icon: appIcon, // the taskbar / window icon (the installed app also carries it in the .exe)
     width: 1280,
     height: 820,
     minWidth: 900,
@@ -221,6 +223,8 @@ function registerIpc() {
     if (process.env.JORMUN_QA_MENU_DUMP) { console.log('[filemenu]', JSON.stringify(tpl)); return }
     if (tpl.length) Menu.buildFromTemplate(tpl).popup({ window: win })
   })
+  // The one outside link in the app (a fixed address, never a URL from the page).
+  ipcMain.handle('app:kofi', () => shell.openExternal('https://ko-fi.com/boredjun'))
   ipcMain.handle('project:reveal', () => {
     if (project) shell.openPath(project.root)
     return !!project
@@ -323,6 +327,7 @@ if (!gotLock) {
   })
   app.on('before-quit', () => { forceClose = true })
   app.whenReady().then(() => {
+    if (process.platform === 'win32') app.setAppUserModelId('com.jormun.writer') // so Windows groups the window under our icon, not Electron's
     Menu.setApplicationMenu(null)
     registerIpc()
     createWindow()

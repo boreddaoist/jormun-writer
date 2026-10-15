@@ -25,18 +25,23 @@ change appears in the app as a **keep / undo** diff, and your own typing is neve
   the AI can read them to keep continuity, and git, Obsidian or any editor can open them too.
 - **Export to Word (.docx) or Markdown**, with your notes as real Word comments if you want them, ready to paste into your
   publishing platform.
-- **Works offline.** Nothing is uploaded; the app never talks to the internet.
+- **Works offline.** Nothing is uploaded; the app itself never connects to the internet (the *Support on Ko-fi* menu item only opens your browser).
 
-> Early version, built for Windows and used for a real web novel. There is no installer yet, so you run it from source
-> (below). Bug reports and ideas are welcome as GitHub issues.
+> Early version, built for Windows and used for a real web novel. Bug reports and ideas are welcome as GitHub issues.
 
 ## Support
 
 If Jormun Writer helps you write, you can support its development on **[Ko-fi](https://ko-fi.com/boredjun)**. Thank you!
 
-## Run
+## Install (Windows)
 
-You need [Node.js](https://nodejs.org) 18 or newer.
+Run `npm run dist` to build the installer: `release/Jormun Writer Setup <version>.exe` (about 90 MB). It installs per user,
+lets you choose the folder, and adds a Start menu entry and a desktop shortcut. The installer is not code-signed, so
+Windows SmartScreen may say "unknown publisher": choose *More info → Run anyway*.
+
+## Run from source
+
+You need [Node.js](https://nodejs.org) 18 or newer (for both the installer build and running from source).
 
 ```
 git clone https://github.com/boreddaoist/jormun-writer.git

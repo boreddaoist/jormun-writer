@@ -1,5 +1,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+
+const openKofi = () => window.jormun.openKofi()
 import {
   state, pickProject, openRecent, openDialog, revealProject, reloadProject, saveAll, newChapter, saveProjectAs, mergeChapters, looseChapters
 } from '../store.js'
@@ -26,6 +28,7 @@ const ICON = {
   reveal: 'M2 4.5a1 1 0 0 1 1-1h3l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1zM6 9.5h4',
   saveas: 'M3 2.5h8l2.5 2.5v4M5 2.5v3.5h5V2.5M3 2.5v11h5M12 10.5v4M10 12.5h4',
   merge: 'M3 3h5l1.5 1.5H13V8M3 3v9h4M9 10.5h5M11.5 8v5',
+  heart: 'M8 13.5S2.5 10 2.5 6.2A2.9 2.9 0 0 1 8 5a2.9 2.9 0 0 1 5.5 1.2C13.5 10 8 13.5 8 13.5z',
   reload: 'M13 8a5 5 0 1 1-1.5-3.6M13 2.5v3h-3',
   sidebar: 'M2.5 3.5h11v9h-11zM6.5 3.5v9'
 }
@@ -72,6 +75,8 @@ const ICON = {
         <button class="menu-item" @click="revealProject"><svg class="mi-ic" viewBox="0 0 16 16"><path :d="ICON.reveal" /></svg>Show in File Explorer</button>
         <button class="menu-item" title="Re-read every file from disk" @click="reloadProject"><svg class="mi-ic" viewBox="0 0 16 16"><path :d="ICON.reload" /></svg>Reload from disk</button>
       </template>
+      <div class="menu-sep"></div>
+      <button class="menu-item" title="Opens ko-fi.com/boredjun in your browser" @click="openKofi"><svg class="mi-ic" viewBox="0 0 16 16"><path :d="ICON.heart" /></svg>Support on Ko-fi</button>
     </div>
   </div>
 </template>
