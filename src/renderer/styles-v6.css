@@ -1,0 +1,97 @@
+/* v6: Navigation pane (heading outline), quick open, review button. Loaded after styles-v5.css. */
+
+/* Navigation pane */
+.sidebar .nav { list-style: none; margin: 4px 0 0; padding: 0; }
+.nav-item { display: flex; align-items: center; gap: 4px; padding-top: 5px; padding-bottom: 5px; padding-right: 8px; border-radius: 6px; cursor: pointer; color: var(--text); min-height: 28px; }
+.nav-item:hover { background: var(--panel-2); }
+.nav-item.active { background: var(--panel-2); color: var(--text-strong); box-shadow: inset 2px 0 0 var(--accent); }
+.nav-item .label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-item.lv1 { font-weight: 700; color: var(--text-strong); font-size: 13.5px; }
+.nav-item.lv2 { font-size: 13px; }
+.nav-item.lv3 { font-size: 12.5px; color: var(--muted); }
+.nav-item.lv3.active { color: var(--text-strong); }
+.nav-item.fb .label { font-weight: 400; font-style: italic; color: var(--text); }
+.fold { width: 16px; height: 16px; flex: none; background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 10px; line-height: 1; padding: 0; border-radius: 4px; }
+.fold:hover { color: var(--text-strong); background: var(--panel-3); }
+.fold-space { width: 16px; flex: none; }
+
+/* the sidebar is now just the outline plus one link at the bottom */
+.side-foot { display: flex; align-items: center; justify-content: space-between; margin: 6px 8px 8px; padding: 8px 10px; background: transparent; border: 1px solid var(--line-2); border-radius: 7px; color: var(--muted); font-size: 12.5px; cursor: pointer; }
+.side-foot:hover { color: var(--text-strong); background: var(--panel-2); }
+.side-foot kbd { font-family: inherit; font-size: 11px; color: var(--muted); }
+
+/* the "n to review" pill is a button now */
+button.review-pill { border: 0; cursor: pointer; font-family: inherit; }
+button.review-pill:hover { background: var(--accent-hover); }
+
+/* quick open */
+.qo-list { list-style: none; margin: 0; padding: 0; max-height: 46vh; overflow-y: auto; }
+.qo-list li { display: flex; flex-direction: column; gap: 1px; padding: 7px 10px; border-radius: 6px; cursor: pointer; }
+.qo-list li.on { background: var(--panel-2); box-shadow: inset 2px 0 0 var(--accent); }
+.qo-title { color: var(--text-strong); font-size: 13.5px; }
+.qo-path { font-family: Consolas, monospace; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qo-empty { cursor: default; }
+
+/* the sidebar forces its children to 268px wide; the bottom link has side margins, so size it explicitly */
+.sidebar > .side-foot { min-width: 0; width: 252px; box-sizing: border-box; }
+
+/* v6.1: menu button + logo in the title bar, sidebar toggle in the Navigation header */
+.menu { display: flex; align-items: center; gap: 4px; }
+.menu-btn.on { background: var(--panel-2); color: var(--text-strong); }
+.menu .logo { width: 22px; height: 22px; border-radius: 4px; flex: none; user-select: none; margin: 0 2px 0 4px; }
+.logo.big { width: 64px; height: 64px; border-radius: 10px; }
+.menu-pop { top: 36px; min-width: 280px; }
+.menu-item { justify-content: flex-start; gap: 0; }
+.menu-item kbd { margin-left: auto; padding-left: 18px; }
+.menu-item .mi-hint { margin-left: auto; }
+.mi-ic { width: 16px; height: 16px; flex: none; margin-right: 10px; fill: none; stroke: var(--muted); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.menu-item:hover:not(:disabled) .mi-ic { stroke: var(--accent); }
+.side-title .side-toggle { width: 26px; height: 26px; margin-left: -4px; }
+.side-title .side-link { flex: 1; text-align: left; }
+.body { position: relative; }
+.side-reopen { position: absolute; top: 6px; left: 6px; z-index: 5; }
+.side-title .muted { white-space: nowrap; letter-spacing: 0.4px; text-transform: none; font-size: 11px; }
+.side-title .side-link { flex: none; }
+.side-title .muted { flex: 1; }
+.body.sbc .toolbar { padding-left: 46px; }
+.logo-btn { width: 34px; height: 34px; }
+.logo-btn .logo { width: 24px; height: 24px; margin: 0; }
+.page.ms { max-width: var(--page-w, 980px); }
+
+/* notes margin: a slim strip of coloured dots until a note is in use, then it opens (like Word) */
+.margin { transition: width 0.18s ease; }
+.margin.slim { width: 52px; }
+.mdot { position: absolute; left: 10px; width: 28px; height: 28px; border-radius: 50%; border: 0; padding: 0; background: var(--nc); color: #fff; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; display: grid; place-items: center; opacity: 0.8; transition: opacity 0.12s ease, transform 0.12s ease; }
+.mdot:hover { opacity: 1; transform: scale(1.1); }
+.mdot.ai { background: var(--ai); color: #06101f; font-size: 10px; }
+
+/* notes in the text: a coloured bar beside the paragraph(s), a faint underline on the passage; selecting a note tints them */
+.live-host .cm-editor .cm-line.cm-noteline { position: relative; }
+.live-host .cm-editor .cm-line.cm-noteline.on { background: color-mix(in srgb, var(--nc) 9%, transparent); border-radius: 4px; }
+.live-host .cm-cmt { background: transparent; border-radius: 0; }
+.live-host .cm-cmt.on { background: var(--nbg); border-radius: 3px; }
+
+/* with a note open: the one selected card, and the others as dots at the right edge */
+.margin:not(.slim) .mcard { right: 54px; }
+.margin:not(.slim) .mdot.side { left: auto; right: 12px; }
+
+/* one note colour: the accent. Only the selected passage is highlighted (no paragraph tint, no per-note colours). */
+.c-yellow, .c-green, .c-blue, .c-pink, .c-purple, .c-orange { --nc: var(--accent); --nbg: rgba(var(--accent-rgb), 0.3); }
+.live-host .cm-editor .cm-line.cm-noteline.on { background: transparent; }
+
+/* the selected note's text is a plain editable field inside the card */
+.mcard textarea.mtext-edit { field-sizing: content; min-height: 1.6em; max-height: 14em; width: 100%; resize: none; background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 3px 5px; margin: 0 -5px; font: inherit; font-size: 13px; line-height: 1.5; color: var(--text); }
+.mcard textarea.mtext-edit:hover { border-color: var(--line-2); }
+.mcard textarea.mtext-edit:focus { border-color: var(--accent); background: transparent; outline: none; }
+
+/* note cards: no fill at all, one outer border; the text field has no border or fill of its own */
+.mcard, .mcard:hover, .mcard.active { background: transparent; box-shadow: none; }
+.mcard textarea.mtext-edit, .mcard textarea.mtext-edit:hover, .mcard textarea.mtext-edit:focus { border: 0; background: transparent; outline: none; box-shadow: none; }
+
+/* line from the noted text to the open card */
+.mlink { position: absolute; pointer-events: none; overflow: visible; }
+.mlink path { stroke: var(--accent); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
+
+/* the chapter title is a plain editable field that looks like the heading */
+.page-head .title-input { display: block; width: 100%; box-sizing: border-box; font-family: var(--editor-font); font-weight: 700; font-size: 30px; line-height: 1.25; margin: 0 0 9px; padding: 0; color: var(--text-strong); letter-spacing: -0.2px; background: transparent; border: 0; outline: none; }
+.page-head .title-input::placeholder { color: var(--muted); }

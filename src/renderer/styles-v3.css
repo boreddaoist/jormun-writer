@@ -1,0 +1,68 @@
+/* v3: live-preview editor, Word-style comment margin, custom title bar. Loaded after styles-v2.css. */
+
+/* ---------- page layout: text column + comment margin ---------- */
+.page-row { display: flex; min-height: 100%; position: relative; }
+.page-col { flex: 1; min-width: 0; }
+.page-col .page { margin: 0 auto; }
+.margin { width: 308px; flex: none; position: relative; }
+
+/* ---------- live editor (CodeMirror) ---------- */
+/* CodeMirror injects its own base styles under a generated class, so every rule here is scoped with
+   `.live-host .cm-editor` to be more specific and win (otherwise the font falls back to monospace). */
+.live-host { min-height: 60vh; cursor: text; }
+.live-host .cm-editor { background: transparent; color: var(--text); outline: none; }
+.live-host .cm-editor.cm-focused { outline: none; }
+.live-host .cm-editor .cm-scroller { overflow: visible; font-family: var(--editor-font); font-size: var(--editor-size); line-height: var(--editor-lh); }
+.live-host .cm-editor .cm-content { font-family: var(--editor-font); padding: 0; caret-color: var(--accent); min-height: 56vh; }
+.live-host .cm-editor .cm-line { padding: 0; }
+.live-host .cm-editor .cm-line::selection, .live-host .cm-editor .cm-line ::selection { background: rgba(200, 167, 99, 0.32); }
+.live-host .cm-editor .cm-placeholder { color: var(--muted); }
+
+.live-host .cm-strong { font-weight: 700; color: var(--text-strong); }
+.live-host .cm-em { font-style: italic; }
+.live-host .cm-strike { text-decoration: line-through; opacity: 0.85; }
+.live-host .cm-syntax { color: var(--muted); opacity: 0.7; font-weight: 400; font-style: normal; text-decoration: none; }
+
+.live-host .cm-editor .cm-h { font-weight: 700; color: var(--text-strong); }
+.live-host .cm-editor .cm-h1 { font-size: 1.7em; line-height: 1.3; padding: 0.35em 0 0.1em; letter-spacing: -0.2px; }
+.live-host .cm-editor .cm-h2 { font-size: 1.4em; line-height: 1.3; padding: 0.3em 0 0.08em; }
+.live-host .cm-editor .cm-h3 { font-size: 1.18em; line-height: 1.35; padding: 0.2em 0 0.05em; }
+.live-host .cm-editor .cm-quote { border-left: 2px solid var(--accent); padding-left: 16px; margin-left: 2px; color: var(--muted); font-style: italic; }
+.live-host .cm-editor .cm-li { padding-left: 0.3em; }
+.live-host .cm-bullet { color: var(--accent); margin-right: 0.5em; }
+.live-host .cm-editor .cm-hr { text-align: center; color: var(--muted); letter-spacing: 7px; }
+
+/* comments inside the text */
+.live-host .cm-cmt { background: var(--cm-hl); border-radius: 3px; }
+.live-host .cm-cmt-raw { background: var(--cm-dim); color: var(--muted); font-style: normal; font-weight: 400; border-radius: 3px; }
+.live-host .cm-badge { display: inline-grid; place-items: center; min-width: 1.2em; height: 1.2em; padding: 0 0.25em; margin: 0 0.12em; font-size: 0.62em; font-weight: 800; line-height: 1; border-radius: 999px; background: var(--accent); color: var(--accent-ink); vertical-align: super; cursor: pointer; user-select: none; }
+.live-host .cm-badge.ai { background: var(--ai); color: #0b1522; }
+
+/* ---------- margin comment cards (Word-style balloons) ---------- */
+.mcard { position: absolute; left: 0; right: 16px; background: var(--panel-2); border: 1px solid var(--line-2); border-left: 3px solid var(--accent); border-radius: 8px; padding: 9px 11px 8px; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.28); cursor: pointer; transition: top 0.16s ease, transform 0.14s ease, background 0.14s ease; }
+.mcard.ai { border-left-color: var(--ai); }
+.mcard:hover { background: var(--panel-3); }
+.mcard.active { background: var(--panel-3); transform: translateX(-12px); border-color: var(--accent); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45); }
+.mcard.ai.active { border-color: var(--ai); }
+.mcard header { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.mcard header strong { color: var(--text-strong); font-size: 12.5px; }
+.avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-size: 11px; font-weight: 800; flex: none; }
+.avatar.ai { background: var(--ai); color: #0b1522; font-size: 10px; }
+.mnum { margin-left: auto; color: var(--muted); font-size: 11px; }
+.mtext { margin: 0; line-height: 1.45; color: var(--text-strong); font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.mquote { margin: 0 0 6px; padding: 1px 0 1px 8px; border-left: 2px solid var(--line-2); color: var(--muted); font-size: 12px; font-style: italic; }
+.mcard footer { display: flex; gap: 14px; margin-top: 7px; }
+.mcard textarea { width: 100%; resize: vertical; background: var(--bg); color: var(--text); border: 1px solid var(--line-2); border-radius: 6px; padding: 7px 9px; font: inherit; font-size: 13px; line-height: 1.45; outline: none; }
+.mcard textarea:focus { border-color: var(--accent); }
+.mrow { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.mcard.composer { cursor: default; }
+
+/* ---------- custom title bar ---------- */
+.topbar { -webkit-app-region: drag; padding-right: 150px; user-select: none; }
+.topbar button, .topbar .menu, .topbar select, .topbar input, .menu-pop { -webkit-app-region: no-drag; }
+.proj-btn { display: inline-flex; align-items: center; gap: 8px; max-width: 320px; background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 4px 9px; color: var(--text); font-size: 13px; cursor: pointer; }
+.proj-btn:hover, .proj-btn.on { background: var(--panel-2); border-color: var(--line-2); color: var(--text-strong); }
+.proj-btn .pname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.proj-btn .caret { color: var(--muted); font-size: 10px; }
+.menu-pop { left: 0; right: auto; }
+.menu-item .mi-hint { color: var(--muted); font-size: 11px; }

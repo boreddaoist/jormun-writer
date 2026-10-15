@@ -1,0 +1,35 @@
+/* v4: note colours, colour swatches, save button. Loaded after styles-v3.css. */
+
+/* each note colour defines --nc (accent) and --nbg (highlight) for whatever carries the class */
+.c-yellow { --nc: #c8a763; --nbg: rgba(200, 167, 99, 0.30); }
+.c-green  { --nc: #5db57b; --nbg: rgba(93, 181, 123, 0.28); }
+.c-blue   { --nc: #6aa6e6; --nbg: rgba(106, 166, 230, 0.28); }
+.c-pink   { --nc: #e57fae; --nbg: rgba(229, 127, 174, 0.28); }
+.c-purple { --nc: #a98ee8; --nbg: rgba(169, 142, 232, 0.28); }
+.c-orange { --nc: #e8985a; --nbg: rgba(232, 152, 90, 0.28); }
+
+/* in the text */
+.live-host .cm-cmt { background: var(--nbg); }
+.live-host .cm-badge { background: var(--nc); color: #101114; }
+.live-host .cm-badge.ai { background: var(--nc); box-shadow: 0 0 0 1.5px var(--ai); } /* AI notes get a blue ring */
+.read mark.hl { background: var(--nbg); }
+.read sup.cmk { color: var(--nc); }
+
+/* margin cards take the note's colour (the AI is shown by its avatar, not by overriding the colour) */
+.mcard, .mcard.ai { border-left-color: var(--nc); }
+.mcard.active, .mcard.ai.active { border-color: var(--nc); }
+
+.swatches { display: flex; gap: 7px; margin-top: 9px; }
+.swatch { width: 16px; height: 16px; padding: 0; border-radius: 50%; border: 2px solid transparent; background: var(--nc); cursor: pointer; transition: transform 0.12s ease; }
+.swatch:hover { transform: scale(1.18); }
+.swatch.on { border-color: var(--text-strong); box-shadow: 0 0 0 1px var(--bg) inset; }
+
+/* title-bar save button */
+.save-btn { display: inline-flex; align-items: center; gap: 7px; padding: 4px 10px; border-radius: 6px; background: transparent; border: 1px solid transparent; color: var(--muted); font-size: 12.5px; cursor: pointer; }
+.save-btn:hover { background: var(--panel-2); border-color: var(--line-2); color: var(--text-strong); }
+.save-btn .sdot { width: 8px; height: 8px; border-radius: 50%; background: #5db57b; flex: none; }
+.save-btn.saving .sdot { background: var(--accent); animation: sdot-pulse 0.9s ease-in-out infinite; }
+.save-btn.unsaved .sdot { background: var(--warn); }
+.save-btn.error .sdot, .save-btn.conflict .sdot { background: #e06a6a; }
+.save-btn.unsaved, .save-btn.error, .save-btn.conflict { color: var(--text-strong); }
+@keyframes sdot-pulse { 50% { opacity: 0.3; } }

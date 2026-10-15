@@ -1,0 +1,55 @@
+/* v5: Jormun family theme. Palette and accents come from Jormun Reader's design tokens
+   (cool near-black blues, ocean blue #0098DA, optional fuchsia #e8316a). Loaded last so it wins. */
+:root {
+  --bg: #020308;
+  --panel: #070910;
+  --panel-2: #11151d;
+  --panel-3: #1a202a;
+  --line: rgba(180, 195, 235, 0.085);
+  --line-2: rgba(190, 204, 245, 0.16);
+  --text: #d6dbea;
+  --text-strong: #f0f2fb;
+  --muted: #8792a6;
+  --accent: #0098DA;        /* overridden at runtime by the Accent setting */
+  --accent-hover: #1aabeb;
+  --accent-rgb: 0, 152, 218;
+  --accent-ink: #ffffff;
+  --warn: #f5a623;
+  --ai: #5b9cf6;
+  --add-bg: rgba(45, 212, 160, 0.15);
+  --add-ink: #2dd4a0;
+  --del-bg: rgba(232, 49, 106, 0.16);
+  --del-ink: #f08aa8;
+  --cm-hl: rgba(var(--accent-rgb), 0.28);
+  --cm-dim: rgba(var(--accent-rgb), 0.12);
+}
+
+/* selection follows the accent */
+.live-host .cm-editor .cm-line::selection, .live-host .cm-editor .cm-line ::selection { background: rgba(var(--accent-rgb), 0.38); }
+
+/* note colours: blue is the default and matches the ocean accent */
+.c-blue   { --nc: #1aabeb; --nbg: rgba(0, 152, 218, 0.26); }
+.c-green  { --nc: #2dd4a0; --nbg: rgba(45, 212, 160, 0.22); }
+.c-yellow { --nc: #e8c14a; --nbg: rgba(232, 193, 74, 0.24); }
+.c-orange { --nc: #f5a623; --nbg: rgba(245, 166, 35, 0.24); }
+.c-pink   { --nc: #ee5a8f; --nbg: rgba(232, 49, 106, 0.24); }
+.c-purple { --nc: #a58bf2; --nbg: rgba(165, 139, 242, 0.24); }
+
+/* badges and active states sit on a coloured chip: keep the label dark on light colours, white on the blue */
+.live-host .cm-badge { color: #06121a; }
+.live-host .cm-badge.c-blue, .live-host .cm-badge.c-pink, .live-host .cm-badge.c-purple { color: #ffffff; }
+.avatar { color: #ffffff; }
+.avatar.ai { background: var(--ai); color: #06101f; }
+.chip { color: var(--accent); }
+.flag { color: #ffffff; }
+
+/* accent controls inside the Aa popover */
+.accent-dots { display: flex; gap: 8px; }
+.accent-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; padding: 0; cursor: pointer; }
+.accent-dot.ocean { background: #0098DA; }
+.accent-dot.fuchsia { background: #e8316a; }
+.accent-dot.on { border-color: var(--text-strong); box-shadow: 0 0 0 1px var(--bg) inset; }
+.pop-check { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); cursor: pointer; }
+.pop-check input { accent-color: var(--accent); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

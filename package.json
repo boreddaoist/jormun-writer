@@ -1,0 +1,33 @@
+{
+  "name": "jormun-writer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Jormun Writer – a folder-of-Markdown novel writer that an AI can edit in VS Code while you keep writing",
+  "main": "dist-electron/main/index.js",
+  "author": "Jormun",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "test": "node --test test/sync.test.mjs test/project.test.mjs test/format.test.mjs test/comments.test.mjs test/exporter.test.mjs test/livemd.test.mjs test/contextmenu.test.mjs test/notes.test.mjs test/outline.test.mjs test/sections.test.mjs"
+  },
+  "dependencies": {
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.14",
+    "@fontsource/eb-garamond": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/lato": "^5.3.0",
+    "@fontsource/literata": "^5.3.0",
+    "chokidar": "^3.6.0",
+    "diff": "^5.2.0",
+    "docx": "^9.11.0",
+    "vue": "^3.4.21"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "electron": "^30.0.1",
+    "electron-vite": "^2.1.0",
+    "vite": "^5.2.8"
+  }
+}
