@@ -20,7 +20,7 @@ change appears in the app as a **keep / undo** diff, and your own typing is neve
   and suggestions the same way (marked **AI**) instead of rewriting your prose. You resolve them when you are done.
 - **The AI proposes, you decide.** Every outside edit is a diff you can keep or undo. If you are typing in the same
   place, the app asks which version to keep and nothing is lost.
-- **Live word count**, a clean dark interface, and fonts, size, line spacing and page width you can set.
+- **Live word count** at the bottom right ("2 of 149 words" while you have text selected), a clean dark interface, and fonts, size, line spacing and page width you can set.
 - **Plain files, no lock-in.** Your characters, world notes and plot live in ordinary `.md` files next to the manuscript, so
   the AI can read them to keep continuity, and git, Obsidian or any editor can open them too.
 - **Export to Word (.docx) or Markdown**, with your notes as real Word comments if you want them, ready to paste into your

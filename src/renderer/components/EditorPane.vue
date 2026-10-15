@@ -4,6 +4,7 @@ import { splitFront, parseFront, countWords, setFrontTitle } from '@shared/text.
 import * as fmt from '@shared/format.mjs'
 import { extractHeadings } from '@shared/outline.mjs'
 import { deleteSection, moveSection, headingTextRange } from '@shared/sections.mjs'
+import { stripComments } from '@shared/comments.mjs'
 import { parseComments, addComment, resolveComment, editComment, setCommentColor, DEFAULT_COLOR } from '@shared/comments.mjs'
 import { state, edit, save, titleOf, setNav, toast } from '../store.js'
 import { prefs } from '../prefs.js'
@@ -26,6 +27,13 @@ const parts = computed(() => splitFront(file.value.buffer))
 const body = computed(() => parts.value.body)
 const meta = computed(() => parseFront(parts.value.front))
 const words = computed(() => countWords(file.value.buffer))
+// words in the selection (notes' markup is not counted), shown next to the total while text is selected
+const selWords = computed(() => {
+  const i = selInfo.value
+  if (!i || i.empty || i.to === undefined) return 0
+  void body.value
+  return countWords(stripComments(body.value.slice(i.from, i.to)))
+})
 const comments = computed(() => parseComments(body.value))
 
 const showMargin = computed(() => prefs.margin && (comments.value.length > 0 || !!composing.value))
@@ -284,6 +292,9 @@ const saveLabel = computed(() => {
           @settled="bump"
         />
       </div>
+    </div>
+    <div class="wordcount" title="Words in this document (notes are not counted)">
+      <template v-if="selWords">{{ selWords.toLocaleString() }} of </template>{{ words.toLocaleString() }} words
     </div>
   </section>
   <section v-else class="editor empty"><p class="muted">Pick a chapter on the left.</p></section>
