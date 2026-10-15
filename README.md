@@ -1,16 +1,55 @@
 # Jormun Writer
 
-A small desktop writer for novels kept as a **folder of Markdown files**. You write in the app;
-an AI (Claude Code in VS Code, or anything that edits files) edits the *same files*. Its changes
-show up in the app as a diff you can keep or undo, and your typing is never overwritten.
+**A distraction-free writing app for web novel authors, where an AI can edit your manuscript while you keep writing, and you decide what stays.**
+
+[![Support on Ko-fi](https://img.shields.io/badge/Support%20me%20on-Ko--fi-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/boredjun)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+![Jormun Writer: the chapter outline on the left, the manuscript in the middle, a margin note open on the right](docs/screenshot.png)
+
+Writing a serial means hundreds of chapters, constant continuity checks and an AI assistant you may or may not trust.
+Jormun Writer keeps the whole book in one plain **Markdown** file and shows it the way you want to read it (bold looks
+bold, headings look like headings, no `**` or `#` clutter). An AI such as Claude Code edits the *same file* in VS Code; each
+change appears in the app as a **keep / undo** diff, and your own typing is never overwritten.
+
+## Why web novel writers like it
+
+- **Your book is one document.** Chapters are headings. A Word-style **Navigation pane** lists every chapter and scene; click
+  to jump, fold what you are not working on, reorder or delete a section from the right-click menu.
+- **Notes in the margin, like Word comments.** Select a passage, right-click, add a note. The AI leaves its questions
+  and suggestions the same way (marked **AI**) instead of rewriting your prose. You resolve them when you are done.
+- **The AI proposes, you decide.** Every outside edit is a diff you can keep or undo. If you are typing in the same
+  place, the app asks which version to keep and nothing is lost.
+- **Live word count**, a clean dark interface, and fonts, size, line spacing and page width you can set.
+- **Plain files, no lock-in.** Your characters, world notes and plot live in ordinary `.md` files next to the manuscript, so
+  the AI can read them to keep continuity, and git, Obsidian or any editor can open them too.
+- **Export to Word (.docx) or Markdown**, with your notes as real Word comments if you want them, ready to paste into your
+  publishing platform.
+- **Works offline.** Nothing is uploaded; the app never talks to the internet.
+
+> Early version, built for Windows and used for a real web novel. There is no installer yet, so you run it from source
+> (below). Bug reports and ideas are welcome as GitHub issues.
+
+## Support
+
+If Jormun Writer helps you write, you can support its development on **[Ko-fi](https://ko-fi.com/boredjun)**. Thank you!
 
 ## Run
 
-- Double-click `Jormun Writer.bat` (opens the last project), or
-- `npm run dev`. Set `JORMUN_PROJECT` or pass `-- --project <folder>` to choose a folder.
+You need [Node.js](https://nodejs.org) 18 or newer.
+
+```
+git clone https://github.com/boreddaoist/jormun-writer.git
+cd jormun-writer
+npm install
+npm run dev
+```
+
+On Windows you can then start it by double-clicking `Jormun Writer.bat` (it opens the last project), or run
+`npm run dev`. Set `JORMUN_PROJECT` or pass `-- --project <folder>` to choose a folder.
 
 If Electron won't start from a VS Code terminal, run `set ELECTRON_RUN_AS_NODE=` first (VS Code sets it; the
-`.bat` files already clear it).
+`.bat` file already clears it).
 
 ## The window
 
@@ -122,8 +161,7 @@ A note starting with `AI:` gets an **AI** avatar: `{>>AI: text<<}`. Resolving a 
 ## Manuscript view and export
 
 - Click **Manuscript** in the sidebar to read every chapter as one continuous document (click a title to edit it).
-- **Export…** (from that view or the project menu): **Word (.docx)** or **Markdown (.md)**, all chapters or the
-  current one, optional title page, and optional notes. In Word, notes become **real Word comments** (author = your
+- **Export…** (from that view or the project menu): **Word (.docx)** or **Markdown (.md)**, the whole manuscript (or the open file), optional title page, and optional notes. In Word, notes become **real Word comments** (author = your
   name, or "AI" for `AI:` notes; the colour and `AI:` tags are not shown in the comment text). Frontmatter never
   appears in the export.
 
