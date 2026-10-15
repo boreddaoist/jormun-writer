@@ -35,7 +35,7 @@ If Jormun Writer helps you write, you can support its development on **[Ko-fi](h
 
 ## Install (Windows)
 
-Run `npm run dist` to build the installer: `release/Jormun Writer Setup <version>.exe` (about 90 MB). It installs per user,
+Download `Jormun Writer Setup 0.2.0.exe` from the [latest release](https://github.com/boreddaoist/jormun-writer/releases/latest), or build it yourself with `npm run dist`: `release/Jormun Writer Setup <version>.exe` (about 90 MB). It installs per user,
 lets you choose the folder, and adds a Start menu entry and a desktop shortcut. The installer is not code-signed, so
 Windows SmartScreen may say "unknown publisher": choose *More info → Run anyway*.
 
