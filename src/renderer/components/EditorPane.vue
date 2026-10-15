@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { splitFront, parseFront, countWords, setFrontTitle } from '@shared/text.mjs'
 import * as fmt from '@shared/format.mjs'
 import { extractHeadings } from '@shared/outline.mjs'
@@ -7,11 +7,12 @@ import { deleteSection, moveSection, headingTextRange } from '@shared/sections.m
 import { stripComments } from '@shared/comments.mjs'
 import { parseComments, addComment, addReply, resolveComment, editComment } from '@shared/comments.mjs'
 import { state, edit, save, titleOf, setNav, toast } from '../store.js'
-import { prefs } from '../prefs.js'
+import { prefs, stepZoom } from '../prefs.js'
 import ReviewBar from './ReviewBar.vue'
 import Toolbar from './Toolbar.vue'
 import LiveEditor from './LiveEditor.vue'
 import CommentMargin from './CommentMargin.vue'
+import ZoomControl from './ZoomControl.vue'
 
 const props = defineProps({ rel: String })
 const live = ref(null)
@@ -43,18 +44,38 @@ const activeKey = computed(() => (composing.value ? 'composer' : activeComment.v
 const items = computed(() => {
   void tick.value
   void body.value
+  void prefs.zoom
   if (!live.value || !row.value) return []
   const rowTop = row.value.getBoundingClientRect().top
+  const z = prefs.zoom / 100 // positions are screen pixels; the zoomed margin lays out in unzoomed ones
   const out = comments.value.map((c) => ({
     key: 'c' + c.n, kind: 'comment', comment: c,
-    top: live.value.posTop(c.anchor ? c.anchorFrom : c.from) - rowTop,
+    top: (live.value.posTop(c.anchor ? c.anchorFrom : c.from) - rowTop) / z,
     ax: live.value.posEndX(c.anchor ? c.anchorFrom : c.from, c.anchor ? c.anchorTo : c.from)
   }))
   if (composing.value) {
-    out.push({ key: 'composer', kind: 'composer', anchor: composing.value.anchor, top: live.value.posTop(composing.value.from) - rowTop, ax: live.value.posEndX(composing.value.from, composing.value.to) })
+    out.push({ key: 'composer', kind: 'composer', anchor: composing.value.anchor, top: (live.value.posTop(composing.value.from) - rowTop) / z, ax: live.value.posEndX(composing.value.from, composing.value.to) })
   }
   return out
 })
+
+// a zoom change resizes the page without any text change: measure the editor again, then move the cards
+watch(() => prefs.zoom, async () => {
+  await nextTick()
+  if (live.value) live.value.remeasure()
+  bump()
+  setTimeout(bump, 120)
+})
+// Ctrl + mouse wheel (or a trackpad pinch) zooms the page, like Word
+let wheelAt = 0
+function onWheel(e) {
+  if (!e.ctrlKey) return
+  e.preventDefault()
+  const now = Date.now()
+  if (now - wheelAt < 70) return
+  wheelAt = now
+  stepZoom(e.deltaY < 0 ? 1 : -1)
+}
 
 let raf = 0
 function bump() {
@@ -246,7 +267,7 @@ const saveLabel = computed(() => {
       @action="onAction"
     />
     <ReviewBar :rel="rel" :file="file" />
-    <div class="page-scroll">
+    <div class="page-scroll" @wheel="onWheel">
       <div ref="row" class="page-row">
         <div class="page-col">
           <article class="page">
@@ -278,6 +299,7 @@ const saveLabel = computed(() => {
           :active-key="activeKey"
           :edit-request="editRequest"
           :expanded="!!composing || !!activeComment"
+          :zoom="prefs.zoom / 100"
           @select="(it) => selectComment(it.comment)"
           @reply="replyNote"
           @resolve="resolve"
@@ -288,8 +310,11 @@ const saveLabel = computed(() => {
         />
       </div>
     </div>
-    <div class="wordcount" title="Words in this document (notes are not counted)">
-      <template v-if="selWords">{{ selWords.toLocaleString() }} of </template>{{ words.toLocaleString() }} words
+    <div class="statusbar">
+      <div class="wordcount" title="Words in this document (notes are not counted)">
+        <template v-if="selWords">{{ selWords.toLocaleString() }} of </template>{{ words.toLocaleString() }} words
+      </div>
+      <ZoomControl />
     </div>
   </section>
   <section v-else class="editor empty"><p class="muted">Pick a chapter on the left.</p></section>

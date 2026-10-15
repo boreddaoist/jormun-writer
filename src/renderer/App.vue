@@ -4,7 +4,7 @@ import {
   state, startup, subscribe, pickProject, saveAll, reviewCount,
   newChapter, sectionOp, openDialog, openRecent, setActive, saveState, SAVE_LABELS, openNextReview
 } from './store.js'
-import { prefs, toggleSidebar, bumpSize } from './prefs.js'
+import { prefs, toggleSidebar, stepZoom, setZoom } from './prefs.js'
 import { baseName } from '@shared/text.mjs'
 import Sidebar from './components/Sidebar.vue'
 import EditorPane from './components/EditorPane.vue'
@@ -50,8 +50,9 @@ function onKey(e) {
   else if (k === 'n' && e.shiftKey) { e.preventDefault(); openDialog('newProject') }
   else if (k === 'n' && state.project) { e.preventDefault(); newChapter() }
   else if (e.key === '\\') { e.preventDefault(); toggleSidebar() }
-  else if (e.key === '=' || e.key === '+') { e.preventDefault(); bumpSize(1) }
-  else if (e.key === '-') { e.preventDefault(); bumpSize(-1) }
+  else if (e.key === '=' || e.key === '+') { e.preventDefault(); stepZoom(1) }
+  else if (e.key === '-') { e.preventDefault(); stepZoom(-1) }
+  else if (e.key === '0') { e.preventDefault(); setZoom(100) }
 }
 onMounted(async () => {
   unsubscribe = subscribe()

@@ -3,6 +3,8 @@ import { computed } from 'vue'
 import { splitFront } from '@shared/text.mjs'
 import { render } from '@shared/md.mjs'
 import { parseComments } from '@shared/comments.mjs'
+import ZoomControl from './ZoomControl.vue'
+import { stepZoom } from '../prefs.js'
 import { state, chapters, titleOf, wordsOf, manuscriptWords, setActive, openDialog } from '../store.js'
 
 // One document made of every chapter in order. Comment numbers continue across chapters.
@@ -24,7 +26,7 @@ const commentTotal = computed(() => sections.value.reduce((n, s) => n + s.commen
       <span class="spacer"></span>
       <button class="tb text" @click="openDialog('export')">Export…</button>
     </div>
-    <div class="page-scroll">
+    <div class="page-scroll" @wheel="(e) => { if (e.ctrlKey) { e.preventDefault(); stepZoom(e.deltaY < 0 ? 1 : -1) } }">
       <article class="page ms">
         <p v-if="!sections.length" class="muted">No chapters yet. Press + in the sidebar to start one.</p>
         <section v-for="s in sections" :key="s.rel" class="ms-chapter">
@@ -40,5 +42,6 @@ const commentTotal = computed(() => sections.value.reduce((n, s) => n + s.commen
         </section>
       </article>
     </div>
+    <div class="statusbar"><ZoomControl /></div>
   </section>
 </template>

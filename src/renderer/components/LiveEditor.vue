@@ -393,7 +393,8 @@ function posEndX(from, to) {
   const c = (end > a && view.coordsAtPos(end - 1, 1)) || view.coordsAtPos(a)
   return c ? c.right : 0
 }
-defineExpose({ getText, getSelection, apply, select, posTop, posEndX, focus, doUndo, doRedo, selectedText })
+const remeasure = () => { if (view) view.requestMeasure() }
+defineExpose({ remeasure, getText, getSelection, apply, select, posTop, posEndX, focus, doUndo, doRedo, selectedText })
 
 // Clicking the empty area below the text puts the cursor at the end.
 function onHostMouseDown(e) {

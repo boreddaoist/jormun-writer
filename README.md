@@ -108,6 +108,7 @@ If you ever want to see the marks, **Aa → Show formatting marks** reveals the 
   Consolas come from Windows; if Calibri is missing the app falls back to Lato.
 - **Look:** the app uses the Jormun family palette (cool near-black blues, taken from Jormun Reader's design tokens). The
   accent is **ocean blue `#0098DA`**; **Aa → Accent** switches to **fuchsia `#e8316a`**, the Reader's other theme.
+- **Zoom** (like Word's): the slider at the bottom right, `Ctrl` + mouse wheel (or a trackpad pinch), or `Ctrl+=` / `Ctrl+-`. 50% to 300% in 10% steps; click the percentage for presets, `Ctrl+0` for 100%. Zoom scales the page, the text and the margin notes together and leaves the toolbar and sidebar alone. It is a view setting: it does not change the font size you chose in **Aa**.
 - Font, size, spacing, accent, author name, sidebar, comment-margin and show-marks state are remembered.
 
 ## How a project looks
@@ -178,7 +179,7 @@ A message starting with `AI:` gets an **AI** avatar and the purple colour: `{>>A
 
 `Ctrl+O` open project · `Ctrl+Shift+N` new project · `Ctrl+P` open file · `Ctrl+N` new chapter · `Ctrl+S` save now · `Ctrl+B` bold ·
 `Ctrl+I` italic · `Ctrl+Alt+M` add note · `Ctrl+Z` / `Ctrl+Y` undo / redo · `Ctrl+\` hide/show sidebar ·
-`Ctrl+=` / `Ctrl+-` font size · `Esc` close a dialog
+`Ctrl+=` / `Ctrl+-` / `Ctrl+0` zoom in / out / reset · `Ctrl` + mouse wheel zoom · `Esc` close a dialog
 
 ## Layout
 

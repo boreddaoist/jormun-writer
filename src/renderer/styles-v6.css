@@ -100,7 +100,7 @@ button.review-pill:hover { background: var(--accent-hover); }
 
 /* word counter, bottom-right of the writing area */
 .editor { position: relative; }
-.wordcount { position: absolute; right: 22px; bottom: 12px; padding: 4px 11px; font-size: 12px; color: var(--muted); background: var(--panel); border: 1px solid var(--line-2); border-radius: 999px; pointer-events: none; user-select: none; }
+.wordcount { padding: 4px 11px; font-size: 12px; color: var(--muted); background: var(--panel); border: 1px solid var(--line-2); border-radius: 999px; pointer-events: none; user-select: none; }
 
 /* a note thread: one block per message */
 .mcard .msg { margin-bottom: 8px; }
@@ -109,3 +109,22 @@ button.review-pill:hover { background: var(--accent-hover); }
 .mdot.ai, .mdot.c-purple { background: #a98ee8; color: #120a24; }
 .mcard textarea.mreply { field-sizing: content; min-height: 1.6em; max-height: 9em; width: 100%; box-sizing: border-box; resize: none; background: transparent; border: 0; border-top: 1px solid var(--line-2); border-radius: 0; padding: 8px 2px 2px; margin-top: 4px; font: inherit; font-size: 13px; line-height: 1.5; color: var(--text); outline: none; }
 .mcard textarea.mreply::placeholder { color: var(--muted); }
+
+/* view zoom: the page and the notes are drawn bigger or smaller together (the toolbar and sidebar are not) */
+.page { padding-left: calc(40px * var(--zoom, 1)); padding-right: calc(40px * var(--zoom, 1)); }
+.page-head .title-input { font-size: calc(30px * var(--zoom, 1)); }
+.margin { width: calc(308px * var(--zoom, 1)); }
+.margin.slim { width: calc(52px * var(--zoom, 1)); }
+.mwrap { position: absolute; left: 0; top: 0; width: 308px; transform-origin: 0 0; }
+.statusbar { position: absolute; right: 22px; bottom: 12px; display: flex; align-items: center; gap: 8px; z-index: 6; }
+.zoomctl { position: relative; display: flex; align-items: center; gap: 4px; padding: 3px 6px; background: var(--panel); border: 1px solid var(--line-2); border-radius: 999px; font-size: 12px; color: var(--muted); user-select: none; }
+.zbtn { width: 20px; height: 20px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 15px; line-height: 1; cursor: pointer; }
+.zbtn:hover:not(:disabled) { background: var(--panel-2); color: var(--text-strong); }
+.zbtn:disabled { opacity: 0.35; cursor: default; }
+.zrange { width: 92px; height: 4px; margin: 0 2px; accent-color: var(--accent); cursor: pointer; }
+.zpct { min-width: 42px; padding: 2px 4px; border: 0; border-radius: 6px; background: transparent; color: var(--text); font: inherit; cursor: pointer; text-align: center; }
+.zpct:hover { background: var(--panel-2); color: var(--text-strong); }
+.zpop { position: absolute; right: 0; bottom: 32px; display: flex; flex-direction: column; min-width: 86px; padding: 5px; background: var(--panel-3); border: 1px solid var(--line-2); border-radius: 8px; box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6); }
+.zitem { padding: 5px 10px; border: 0; border-radius: 5px; background: transparent; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.zitem:hover { background: var(--panel-2); color: var(--text-strong); }
+.zitem.on { color: var(--accent); }

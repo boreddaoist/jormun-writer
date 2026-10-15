@@ -8,6 +8,7 @@ import { prefs } from '../prefs.js'
 const props = defineProps({
   items: { type: Array, default: () => [] }, // { key, top, kind: 'comment'|'composer', comment?, anchor? }
   activeKey: { type: String, default: '' },
+  zoom: { type: Number, default: 1 }, // the page is drawn zoomed: measurements in screen pixels are divided by this
   expanded: { type: Boolean, default: true }, // false = slim strip of note dots; true = full cards (Word opens the pane on click)
   editRequest: { type: Object, default: () => ({ key: '', t: 0 }) } // asks a card to open its editor (right-click -> Edit note)
 })
@@ -21,7 +22,7 @@ const ro = typeof ResizeObserver !== 'undefined'
   ? new ResizeObserver((entries) => {
       for (const e of entries) {
         const k = e.target.dataset.key
-        if (k) heights[k] = Math.ceil(e.target.getBoundingClientRect().height)
+        if (k) heights[k] = Math.ceil(e.target.getBoundingClientRect().height / props.zoom)
       }
     })
   : null
@@ -33,7 +34,7 @@ function setEl(key, el) {
       els[key] = el
       el.dataset.key = key
       if (ro) ro.observe(el)
-      heights[key] = Math.ceil(el.getBoundingClientRect().height)
+      heights[key] = Math.ceil(el.getBoundingClientRect().height / props.zoom)
     }
   } else if (els[key]) {
     if (ro) ro.unobserve(els[key])
@@ -51,7 +52,7 @@ const link = computed(() => {
   const it = props.items.find((i) => i.key === props.activeKey)
   if (!props.expanded || !it || !aside.value || !it.ax) return null
   const asideLeft = aside.value.getBoundingClientRect().left
-  const x0 = Math.min(it.ax - asideLeft, -20) // start (relative to the margin's left edge)
+  const x0 = Math.min((it.ax - asideLeft) / props.zoom, -20) // start (relative to the margin's left edge)
   const x1 = -12 // the open card is nudged 12px left
   const yC = tops.value[it.key] || 0 // the card's top edge
   const yA = it.top // along the top edge of the text: straight across into the card's top-left corner (a bend only if the card was pushed down)
@@ -123,6 +124,7 @@ function sendReply(c, key) {
 
 <template>
   <aside ref="aside" class="margin" :class="{ slim: !expanded }" aria-label="Notes" @transitionend.self="emit('settled')">
+    <div class="mwrap" :style="{ transform: `scale(${zoom})` }">
     <svg v-if="link" class="mlink" :class="'c-' + link.color" :style="{ top: link.top + 'px', left: link.left + 'px', width: link.w + 'px', height: link.h + 'px' }" :width="link.w" :height="link.h" aria-hidden="true">
       <path :d="`M0 ${link.a} H${Math.max(link.w - 14, 0)} V${link.c} H${link.w}`" fill="none" />
     </svg>
@@ -198,5 +200,6 @@ function sendReply(c, key) {
         </footer>
       </article>
     </template>
+    </div>
   </aside>
 </template>
