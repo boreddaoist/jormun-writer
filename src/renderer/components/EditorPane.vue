@@ -5,7 +5,7 @@ import * as fmt from '@shared/format.mjs'
 import { extractHeadings } from '@shared/outline.mjs'
 import { deleteSection, moveSection, headingTextRange } from '@shared/sections.mjs'
 import { stripComments } from '@shared/comments.mjs'
-import { parseComments, addComment, resolveComment, editComment, setCommentColor, DEFAULT_COLOR } from '@shared/comments.mjs'
+import { parseComments, addComment, addReply, resolveComment, editComment } from '@shared/comments.mjs'
 import { state, edit, save, titleOf, setNav, toast } from '../store.js'
 import { prefs } from '../prefs.js'
 import ReviewBar from './ReviewBar.vue'
@@ -17,7 +17,6 @@ const props = defineProps({ rel: String })
 const live = ref(null)
 const row = ref(null)
 const composing = ref(null) // { from, to, anchor } while the new-note box is open
-const composeColor = ref(DEFAULT_COLOR)
 const editRequest = ref({ key: '', t: 0 }) // "Edit note" from the right-click menu
 const selInfo = ref({ head: 0, formats: {} })
 const tick = ref(0) // bumped when the editor's layout changes, so margin cards re-measure
@@ -122,7 +121,6 @@ function onNoteAction(a) {
   const c = comments.value.find((x) => x.n === a.n)
   if (!c) return
   if (a.name === 'note-delete') return resolve(c)
-  if (a.name === 'note-color') return setColor(c, a.color)
   if (a.name === 'note-edit') {
     prefs.margin = true
     selectComment(c)
@@ -155,7 +153,6 @@ function startComment() {
   while (from < to && /\s/.test(v[from])) from++
   while (to > from && /\s/.test(v[to - 1])) to--
   composing.value = { from, to, anchor: v.slice(from, to) }
-  composeColor.value = DEFAULT_COLOR
   prefs.margin = true
   bump()
 }
@@ -173,7 +170,7 @@ function submitComment(text) {
   } else if (!c.anchor) {
     from = to = Math.min(from, v.length)
   }
-  ed.apply(addComment(v, from, to, text, composeColor.value))
+  ed.apply(addComment(v, from, to, text))
   composing.value = null
 }
 function cancelComment() {
@@ -189,13 +186,13 @@ function resolve(c) {
   const cur = currentComment(c)
   if (cur) live.value.apply(resolveComment(cur))
 }
-function saveEdit(c, text) {
+function saveEdit(c, text, index = 0) {
   const cur = currentComment(c)
-  if (cur) live.value.apply(editComment(cur, text))
+  if (cur) live.value.apply(editComment(cur, text, index))
 }
-function setColor(c, color) {
+function replyNote(c, text) {
   const cur = currentComment(c)
-  if (cur && cur.color !== color) live.value.apply(setCommentColor(cur, color))
+  if (cur) live.value.apply(addReply(cur, text))
 }
 function selectComment(c) {
   if (!live.value) return
@@ -279,12 +276,10 @@ const saveLabel = computed(() => {
           v-if="showMargin"
           :items="items"
           :active-key="activeKey"
-          :composer-color="composeColor"
           :edit-request="editRequest"
           :expanded="!!composing || !!activeComment"
           @select="(it) => selectComment(it.comment)"
-          @composer-color="(c) => (composeColor = c)"
-          @set-color="setColor"
+          @reply="replyNote"
           @resolve="resolve"
           @save-edit="saveEdit"
           @submit="submitComment"

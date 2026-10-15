@@ -149,25 +149,29 @@ Outside edits are kept out of Ctrl+Z (use **Undo AI changes** for those), and yo
 Select text, then press right-click → **Add note to selection…** (or `Ctrl+Alt+M`). A box appears in the right
 margin level with the text; type, and press Enter. Notes work the way Word's comments do:
 
-- in the text a note shows as no mark at all until you select the note, then only its passage is highlighted (one colour, the app's accent) (no numbers or marks in the text);
+- in the text a note shows as no mark at all until you select the note, then only its passage is highlighted (blue for your notes, purple for the AI's) (no numbers or marks in the text);
 - the margin stays a **slim strip of small round dots** (one per note, level with its text) until you use a note; click a dot, click into a noted passage or add a note and it **opens the selected note as a full card, pushing the page left** (the other notes stay as small dots); click elsewhere in the text and it slims back down
 - each note is a card in the right margin, **level with its text**, joined to it by a thin line when selected (cards that would overlap stack downward);
 - click a card (or a dot) to select the passage; the selected card's text is editable right there (no Edit button; it saves when you click away or press Enter, Esc cancels) and it has a **Resolve** button;
 - right-click a noted passage for **Edit note** and **Resolve note**;
 - the margin only appears when the chapter has notes.
 
-There is one note colour (the accent); old `[green]`-style tags in a file are still read, kept and ignored. Notes are stored inline in the Markdown (CriticMarkup), so the AI can read and write them too:
+A note is a **conversation**: each note is a thread, you can reply, and the AI can answer you. The author's notes are **blue**, the AI's are **purple**. Select a note, type in **Reply…** at the bottom of its card and press Enter. Your own messages can be edited in place; the AI's are read-only. In the file the messages share one line, separated by `↳`, and a message starting with `AI:` is the AI's:
+
+    {==her hair==}{>>AI: black here, brown in chapter 2? ↳ typo, black everywhere ↳ AI: ok<<}
+
+Old `[green]`-style colour tags are ignored. Notes are stored inline in the Markdown (CriticMarkup), so the AI can read and write them too:
 
     {==the passage==}{>>your note<<}        {>>a note with no passage<<}        {==her hair==}{>>[green] fixed<<}
 
-A note starting with `AI:` gets an **AI** avatar: `{>>AI: text<<}`. Resolving a note removes the marker and keeps your text (Ctrl+Z brings it back). Notes are never counted as words.
+A message starting with `AI:` gets an **AI** avatar and the purple colour: `{>>AI: text<<}`. Resolving a note removes the marker and keeps your text (Ctrl+Z brings it back). Notes are never counted as words.
 `docs/AI-INSTRUCTIONS.md` tells the AI to leave `AI:` notes instead of editing prose when it only has a question or a suggestion.
 
 ## Manuscript view and export
 
 - Click **Manuscript** in the sidebar to read every chapter as one continuous document (click a title to edit it).
-- **Export…** (from that view or the project menu): **Word (.docx)** or **Markdown (.md)**, the whole manuscript (or the open file), optional title page, and optional notes. In Word, notes become **real Word comments** (author = your
-  name, or "AI" for `AI:` notes; the colour and `AI:` tags are not shown in the comment text). Frontmatter never
+- **Export…** (from that view or the project menu): **Word (.docx)** or **Markdown (.md)**, the whole manuscript (or the open file), optional title page, and optional notes. In Word, notes become **real Word comments** (author = whoever started the note: your
+  name, or "AI"; replies follow in the same comment, each with its speaker). Frontmatter never
   appears in the export.
 
 ## Keys

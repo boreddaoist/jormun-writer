@@ -24,14 +24,17 @@ function runsFor(nodes, st, ctx) {
         continue
       }
       const id = ctx.comments.length
-      const p = parseCommentText(n.text) // drops the AI: and [colour] tags from the note text
+      const p = parseCommentText(n.text) // drops the AI: tag and splits the thread
       const ai = p.author === 'AI'
       ctx.comments.push({
         id,
         author: ai ? 'AI' : ctx.author,
         initials: ai ? 'AI' : (ctx.author.match(/\b\w/g) || ['A']).slice(0, 2).join('').toUpperCase(),
         date: new Date(),
-        children: [new Paragraph({ children: [new TextRun({ text: p.text, font: FONT })] })]
+        // the first message is the comment; replies follow as extra paragraphs, each with its speaker
+        children: p.messages.map((m, i) => new Paragraph({
+          children: [new TextRun({ text: i === 0 ? m.text : (m.author === 'AI' ? 'AI: ' : (ctx.author || 'Author') + ': ') + m.text, font: FONT })]
+        }))
       })
       out.push(new CommentRangeStart(id))
       if (n.anchor) out.push(...runsFor(n.anchor, st, ctx))

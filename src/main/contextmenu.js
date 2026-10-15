@@ -4,7 +4,6 @@
 // deps for the file menu:    { send(action), reveal(rel), copyPath(rel) }
 // ctx (asked of the page at the click point): { editor: bool, note: number (0 = none), color: string, selection: bool }
 
-import { NOTE_COLORS } from '../shared/comments.mjs'
 
 const acc = (label, accelerator, click) => ({ label, accelerator, registerAccelerator: false, click })
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1)

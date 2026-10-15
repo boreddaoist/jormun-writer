@@ -33,8 +33,12 @@ The app shows Word-style notes (comments) in the right margin. They are stored i
 
 - To flag a problem, ask a question, or suggest a change **without editing the prose**, leave a note.
   Always start the note text with `AI:` so the app shows it as yours.
-- Notes have a single colour; do not add colour tags (old `[green]`-style tags may exist in files; leave them as they are).
-  Example: `{==her hair==}{>>AI: black here, brown in Chapter 2<<}`.
+- A note is a conversation. Messages are separated by ` ↳ ` on the same line, and a message that starts with `AI:` is yours;
+  every other message is the author's. The author's notes show in blue, yours in purple.
+  To answer the author's note, append to the same note instead of writing a new one:
+  `{==her hair==}{>>AI: black here, brown in chapter 2? ↳ typo, black everywhere ↳ AI: understood, no change needed<<}`.
+  Never remove or reword the author's messages, and keep the `↳` separators.
+- Colour tags such as `[green]` are no longer used; leave old ones as they are.
 - Keep each note on one line, short and specific ("Jinx has black hair here but brown in Chapter 2").
 - The author's own notes have no `AI:` prefix. Read them as feedback or instructions. When you act on one,
   leave it in place and add a short `AI:` note saying what you did. **The author deletes notes, not you.**

@@ -4,32 +4,44 @@
 //     {>>a note with no passage<<}                          loose note
 //
 // Because they live in the file, an AI can leave notes for the author and read the author's.
-// The note text may start with two optional tags, in either order:
-//     AI:        marks the note as the AI's        {>>AI: does the dog exist yet?<<}
-//     [green]    a colour (blue is the default)  {>>[green] check the timeline<<}
-//     both:      {>>AI: [blue] her hair is black here<<}
-// Notes are one line each; line breaks inside a note are turned into spaces.
+//
+// A note is a conversation. Its messages sit on one line, separated by " ↳ ". A message that starts with
+// "AI:" is the AI's; any other message is the author's:
+//
+//     {==her hair==}{>>AI: black here, brown in chapter 2? ↳ typo, it is black everywhere ↳ AI: ok, noted<<}
+//
+// The colour follows who started the note: the author's notes are blue, the AI's are purple. (Old notes may carry
+// a [green]-style colour tag; it is ignored.) Notes are one line each; line breaks inside a message become spaces.
 
-export const NOTE_COLORS = ['blue', 'green', 'yellow', 'orange', 'pink', 'purple']
-export const DEFAULT_COLOR = 'blue' // the Jormun ocean blue, so an untagged note matches the app's accent
+export const THREAD_SEP = ' ↳ '
+export const AUTHOR_COLOR = 'blue' // the Jormun ocean blue, same as the app's accent
+export const AI_COLOR = 'purple'
 
 const RE = /\{==([^\n]*?)==\}\{>>([^\n]*?)<<\}|\{>>([^\n]*?)<<\}/g
-const HEAD = /^\s*(?:(AI:)\s*)?(?:\[(yellow|green|blue|pink|purple|orange)\]\s*)?(?:(AI:)\s*)?/i
+const HEAD = /^\s*(?:(AI:)\s*)?(?:\[(?:yellow|green|blue|pink|purple|orange)\]\s*)?(?:(AI:)\s*)?/i
 
-// Split a note's raw text into its tags and the visible text.
-export function parseCommentText(raw) {
-  const m = HEAD.exec(raw)
-  return {
-    text: raw.slice(m[0].length),
-    author: m[1] || m[3] ? 'AI' : '',
-    color: m[2] ? m[2].toLowerCase() : DEFAULT_COLOR
-  }
+export const noteColor = (author) => (author === 'AI' ? AI_COLOR : AUTHOR_COLOR)
+
+// The messages of a note: [{ author: 'AI' | '', text }], oldest first.
+export function parseMessages(raw) {
+  const out = raw.split(/\s*↳\s*/).map((seg) => {
+    const m = HEAD.exec(seg)
+    return { author: m[1] || m[2] ? 'AI' : '', text: seg.slice(m[0].length).trim() }
+  })
+  return out.filter((m, i) => m.text || i === 0)
 }
 
-// The inverse: build the raw text from its parts. Yellow is the default, so it is written as no tag.
-export function composeCommentText({ text, author = '', color = DEFAULT_COLOR }) {
-  const tag = color && color !== DEFAULT_COLOR && NOTE_COLORS.includes(color) ? `[${color}] ` : ''
-  return (author === 'AI' ? 'AI: ' : '') + tag + text
+// The first message, plus the whole thread.
+export function parseCommentText(raw) {
+  const messages = parseMessages(raw)
+  const first = messages[0]
+  return { text: first.text, author: first.author, color: noteColor(first.author), messages }
+}
+
+const clean = (s) => s.replace(/\s*\n\s*/g, ' ').replace(/<<\}/g, '<< }').replace(/↳/g, '→').trim()
+
+export function composeThread(messages) {
+  return messages.map((m) => (m.author === 'AI' ? 'AI: ' : '') + clean(m.text)).join(THREAD_SEP)
 }
 
 export function parseComments(body) {
@@ -50,7 +62,8 @@ export function parseComments(body) {
       raw,
       text: p.text,
       author: p.author,
-      color: p.color
+      color: p.color,
+      messages: p.messages
     })
   }
   return out
@@ -60,12 +73,12 @@ export function stripComments(text) {
   return text.replace(/\{==([^\n]*?)==\}\{>>[^\n]*?<<\}/g, '$1').replace(/\{>>[^\n]*?<<\}/g, '')
 }
 
-const clean = (s) => s.replace(/\s*\n\s*/g, ' ').replace(/<<\}/g, '<< }').trim()
-
 // Edits below follow the same shape as format.mjs: { from, to, insert, selStart, selEnd }.
 
-export function addComment(body, from, to, text, color = DEFAULT_COLOR) {
-  const t = composeCommentText({ text: clean(text), color })
+const wrap = (c, raw) => (c.anchor ? `{==${c.anchor}==}{>>${raw}<<}` : `{>>${raw}<<}`)
+
+export function addComment(body, from, to, text, author = '') {
+  const t = composeThread([{ author, text }])
   if (from < to) {
     const sel = body.slice(from, to).replace(/==\}|\{==/g, '')
     const insert = `{==${sel}==}{>>${t}<<}`
@@ -80,11 +93,15 @@ export function resolveComment(c) {
   return { from: c.from, to: c.to, insert: c.anchor, selStart: c.from, selEnd: c.from + c.anchor.length }
 }
 
-// Change the text and/or the colour of a note; its author tag is kept.
-export function editComment(c, text, color) {
-  const t = composeCommentText({ text: clean(text), author: c.author, color: color === undefined ? c.color : color })
-  const insert = c.anchor ? `{==${c.anchor}==}{>>${t}<<}` : `{>>${t}<<}`
+// Answer a note: appends a message to its thread.
+export function addReply(c, text, author = '') {
+  const insert = wrap(c, composeThread([...c.messages, { author, text }]))
   return { from: c.from, to: c.to, insert, selStart: c.from + insert.length, selEnd: c.from + insert.length }
 }
 
-export const setCommentColor = (c, color) => editComment(c, c.text, color)
+// Change the text of one message in the thread (the first one by default); who wrote it is kept.
+export function editComment(c, text, index = 0) {
+  const messages = c.messages.map((m, i) => (i === index ? { ...m, text } : m))
+  const insert = wrap(c, composeThread(messages))
+  return { from: c.from, to: c.to, insert, selStart: c.from + insert.length, selEnd: c.from + insert.length }
+}

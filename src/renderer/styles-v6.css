@@ -76,7 +76,9 @@ button.review-pill:hover { background: var(--accent-hover); }
 .margin:not(.slim) .mdot.side { left: auto; right: 12px; }
 
 /* one note colour: the accent. Only the selected passage is highlighted (no paragraph tint, no per-note colours). */
-.c-yellow, .c-green, .c-blue, .c-pink, .c-purple, .c-orange { --nc: var(--accent); --nbg: rgba(var(--accent-rgb), 0.3); }
+.c-yellow, .c-green, .c-blue, .c-pink, .c-orange { --nc: var(--accent); --nbg: rgba(var(--accent-rgb), 0.3); }
+/* two voices: the author's notes are the accent blue, the AI's are purple */
+.c-purple { --nc: #a98ee8; --nbg: rgba(169, 142, 232, 0.3); }
 .live-host .cm-editor .cm-line.cm-noteline.on { background: transparent; }
 
 /* the selected note's text is a plain editable field inside the card */
@@ -90,7 +92,7 @@ button.review-pill:hover { background: var(--accent-hover); }
 
 /* line from the noted text to the open card */
 .mlink { position: absolute; pointer-events: none; overflow: visible; }
-.mlink path { stroke: var(--accent); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
+.mlink path { stroke: var(--nc, var(--accent)); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
 
 /* the chapter title is a plain editable field that looks like the heading */
 .page-head .title-input { display: block; width: 100%; box-sizing: border-box; font-family: var(--editor-font); font-weight: 700; font-size: 30px; line-height: 1.25; margin: 0 0 9px; padding: 0; color: var(--text-strong); letter-spacing: -0.2px; background: transparent; border: 0; outline: none; }
@@ -99,3 +101,11 @@ button.review-pill:hover { background: var(--accent-hover); }
 /* word counter, bottom-right of the writing area */
 .editor { position: relative; }
 .wordcount { position: absolute; right: 22px; bottom: 12px; padding: 4px 11px; font-size: 12px; color: var(--muted); background: var(--panel); border: 1px solid var(--line-2); border-radius: 999px; pointer-events: none; user-select: none; }
+
+/* a note thread: one block per message */
+.mcard .msg { margin-bottom: 8px; }
+.mcard .msg:last-of-type { margin-bottom: 4px; }
+.mcard .msg.ai .avatar, .mcard .avatar.ai { background: #a98ee8; color: #120a24; }
+.mdot.ai, .mdot.c-purple { background: #a98ee8; color: #120a24; }
+.mcard textarea.mreply { field-sizing: content; min-height: 1.6em; max-height: 9em; width: 100%; box-sizing: border-box; resize: none; background: transparent; border: 0; border-top: 1px solid var(--line-2); border-radius: 0; padding: 8px 2px 2px; margin-top: 4px; font: inherit; font-size: 13px; line-height: 1.5; color: var(--text); outline: none; }
+.mcard textarea.mreply::placeholder { color: var(--muted); }

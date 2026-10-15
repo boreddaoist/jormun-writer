@@ -1,77 +1,91 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  parseCommentText, composeCommentText, parseComments, addComment, editComment, setCommentColor, resolveComment,
-  NOTE_COLORS, DEFAULT_COLOR
+  parseCommentText, parseMessages, composeThread, parseComments, addComment, addReply, editComment, resolveComment,
+  noteColor, THREAD_SEP
 } from '../src/shared/comments.mjs'
 import { applyEdit } from '../src/shared/format.mjs'
 import { render } from '../src/shared/md.mjs'
 import { buildDocx } from '../src/main/exporter.js'
 import JSZip from 'jszip'
 
-test('the default note colour is blue (the Jormun accent)', () => {
-  assert.equal(DEFAULT_COLOR, 'blue')
-  assert.equal(NOTE_COLORS[0], 'blue')
-  assert.equal(NOTE_COLORS.length, 6)
+test('two voices: the author is blue, the AI is purple', () => {
+  assert.equal(noteColor(''), 'blue')
+  assert.equal(noteColor('AI'), 'purple')
 })
 
-test('note text tags: colour and AI, in either order, are split from the visible text', () => {
-  assert.deepEqual(parseCommentText('plain'), { text: 'plain', author: '', color: 'blue' })
-  assert.deepEqual(parseCommentText('[green] check this'), { text: 'check this', author: '', color: 'green' })
-  assert.deepEqual(parseCommentText('AI: why?'), { text: 'why?', author: 'AI', color: 'blue' })
-  assert.deepEqual(parseCommentText('AI: [orange] why?'), { text: 'why?', author: 'AI', color: 'orange' })
-  assert.deepEqual(parseCommentText('AI: [blue] why?'), { text: 'why?', author: 'AI', color: 'blue' }, 'an explicit [blue] still works')
-  assert.deepEqual(parseCommentText('[Pink] AI: why?'), { text: 'why?', author: 'AI', color: 'pink' })
-  assert.deepEqual(parseCommentText('[purple]no space'), { text: 'no space', author: '', color: 'purple' })
+test('a note is a thread: messages split on the arrow, AI: marks the AI, the rest is the author', () => {
+  assert.deepEqual(parseMessages('plain'), [{ author: '', text: 'plain' }])
+  assert.deepEqual(parseMessages('AI: why?'), [{ author: 'AI', text: 'why?' }])
+  assert.deepEqual(parseMessages('AI: black here? ↳ it is black everywhere ↳ AI: ok, noted'), [
+    { author: 'AI', text: 'black here?' },
+    { author: '', text: 'it is black everywhere' },
+    { author: 'AI', text: 'ok, noted' }
+  ])
+  assert.equal(parseMessages('a ↳ ↳ b').length, 2, 'an empty reply is dropped')
+  assert.equal(parseMessages('mention AI: later').length, 1)
+  assert.equal(parseMessages('mention AI: later')[0].author, '', 'AI: only counts at the start of a message')
+})
+
+test('old colour tags are ignored: the visible text is clean and the colour follows the author', () => {
+  assert.deepEqual(parseCommentText('[green] check this').text, 'check this')
+  assert.equal(parseCommentText('[green] check this').color, 'blue')
+  const ai = parseCommentText('AI: [orange] why?')
+  assert.equal(ai.text, 'why?')
+  assert.equal(ai.author, 'AI')
+  assert.equal(ai.color, 'purple')
   assert.equal(parseCommentText('[nonsense] stays text').text, '[nonsense] stays text')
-  assert.equal(parseCommentText('mention [green] later').text, 'mention [green] later', 'tags only count at the start')
 })
 
-test('compose is the inverse of parse; the default colour is written as no tag', () => {
-  for (const c of NOTE_COLORS) {
-    const raw = composeCommentText({ text: 'hello', author: 'AI', color: c })
-    assert.deepEqual(parseCommentText(raw), { text: 'hello', author: 'AI', color: c })
-  }
-  assert.equal(composeCommentText({ text: 'x', color: 'blue' }), 'x')
-  assert.equal(composeCommentText({ text: 'x', color: 'yellow' }), '[yellow] x')
-  assert.equal(composeCommentText({ text: 'x', color: 'green' }), '[green] x')
-  assert.equal(composeCommentText({ text: 'x', author: 'AI', color: 'green' }), 'AI: [green] x')
+test('compose is the inverse of parse and writes the arrow between messages', () => {
+  const msgs = [{ author: 'AI', text: 'q?' }, { author: '', text: 'a' }]
+  const raw = composeThread(msgs)
+  assert.equal(raw, 'AI: q? ↳ a')
+  assert.deepEqual(parseMessages(raw), msgs)
+  assert.equal(composeThread([{ author: '', text: 'x ↳ y' }]), 'x → y', 'an arrow typed inside a message cannot split the thread')
+  assert.equal(THREAD_SEP, ' ↳ ')
 })
 
-test('adding a coloured note writes the tag; parseComments reads it back', () => {
+test('add a note, reply to it, edit one message, resolve', () => {
   const t = 'The girl screamed.'
-  const body = applyEdit(t, addComment(t, 4, 8, 'which girl?', 'green'))
-  assert.equal(body, 'The {==girl==}{>>[green] which girl?<<} screamed.')
-  const [c] = parseComments(body)
-  assert.equal(c.color, 'green')
-  assert.equal(c.text, 'which girl?')
+  let body = applyEdit(t, addComment(t, 4, 8, 'which girl?', 'AI'))
+  assert.equal(body, 'The {==girl==}{>>AI: which girl?<<} screamed.')
+  let [c] = parseComments(body)
+  assert.equal(c.author, 'AI')
+  assert.equal(c.color, 'purple')
+  assert.equal(c.messages.length, 1)
+
+  body = applyEdit(body, addReply(c, 'Jinx, the raven one'))
+  assert.equal(body, 'The {==girl==}{>>AI: which girl? ↳ Jinx, the raven one<<} screamed.')
+  ;[c] = parseComments(body)
+  assert.equal(c.messages.length, 2)
+  assert.equal(c.author, 'AI', 'the thread keeps the colour of who started it')
+
+  body = applyEdit(body, addReply(c, 'thanks, clear now', 'AI'))
+  ;[c] = parseComments(body)
+  assert.equal(c.messages.map((m) => m.author).join(','), 'AI,,AI')
+
+  const edited = applyEdit(body, editComment(c, 'Jinx, the one with the sack', 1))
+  assert.ok(edited.includes('AI: which girl? ↳ Jinx, the one with the sack ↳ AI: thanks, clear now'))
+  assert.equal(applyEdit(body, resolveComment(c)), 'The girl screamed.', 'resolving removes the whole thread and keeps the text')
   assert.equal(applyEdit(t, addComment(t, 4, 8, 'plain')), 'The {==girl==}{>>plain<<} screamed.')
 })
 
-test('changing colour keeps the text and the AI tag; editing text keeps the colour', () => {
-  const body = 'a {==b==}{>>AI: [green] check<<} c'
-  const [c] = parseComments(body)
-  assert.equal(applyEdit(body, setCommentColor(c, 'pink')), 'a {==b==}{>>AI: [pink] check<<} c')
-  assert.equal(applyEdit(body, setCommentColor(c, 'blue')), 'a {==b==}{>>AI: check<<} c', 'back to the default removes the tag')
-  assert.equal(applyEdit(body, editComment(c, 'new words')), 'a {==b==}{>>AI: [green] new words<<} c')
-  assert.equal(applyEdit(body, resolveComment(c)), 'a b c')
-})
-
-test('Manuscript view HTML carries the colour class and hides the tags', () => {
-  const h = render('x {==y==}{>>AI: [green] why<<}')
-  assert.ok(h.includes('class="hl c-green"'))
-  assert.ok(h.includes('class="cmk c-green"'))
+test('Manuscript view HTML uses the starter colour and shows the first message', () => {
+  const h = render('x {==y==}{>>AI: why ↳ because<<}')
+  assert.ok(h.includes('class="hl c-purple"'))
+  assert.ok(h.includes('class="cmk c-purple"'))
   assert.ok(h.includes('title="why"'))
 })
 
-test('Word export: note text has no tags, AI author is kept', async () => {
+test('Word export: the first message is the comment, replies follow with who said them', async () => {
   const buf = await buildDocx({
     title: 'T', author: 'Jun', includeComments: true, titlePage: false,
-    chapters: [{ title: 'C', text: 'a {==b==}{>>AI: [blue] check the hair<<} c {>>[green] mine<<}' }]
+    chapters: [{ title: 'C', text: 'a {==b==}{>>AI: check the hair ↳ it is black ↳ AI: ok<<} c {>>mine<<}' }]
   })
   const z = await JSZip.loadAsync(buf)
   const xml = await z.file('word/comments.xml').async('string')
   const texts = (xml.match(/<w:t[^>]*>([^<]*)<\/w:t>/g) || []).map((s) => s.replace(/<[^>]+>/g, ''))
-  assert.deepEqual(texts, ['check the hair', 'mine'])
+  assert.deepEqual(texts, ['check the hair', 'Jun: it is black', 'AI: ok', 'mine'])
   assert.ok(xml.includes('w:author="AI"') && xml.includes('w:author="Jun"'))
 })

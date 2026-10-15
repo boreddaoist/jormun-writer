@@ -59,7 +59,7 @@ test('formatting round trip: italic toggled inside bold re-parses as bold+italic
 test('comments render as numbered highlights; numbering continues across calls', () => {
   const ctx = { n: 0 }
   const h1 = render('one {==two==}{>>AI: why?<<}', ctx)
-  assert.ok(h1.includes('<mark class="hl c-blue" id="cm-1">two</mark><sup class="cmk c-blue" data-n="1" title="why?">1</sup>'))
+  assert.ok(h1.includes('<mark class="hl c-purple" id="cm-1">two</mark><sup class="cmk c-purple" data-n="1" title="why?">1</sup>'))
   const h2 = render('{>>loose<<}', ctx)
   assert.ok(h2.includes('data-n="2"'))
 })

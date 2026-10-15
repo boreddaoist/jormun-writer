@@ -3,17 +3,15 @@
 // cards that would overlap are pushed down (stackCards). Items come from the editor with a viewport-relative `top`.
 import { ref, reactive, computed, watch, nextTick, onBeforeUnmount } from 'vue'
 import { stackCards } from '@shared/livemd.mjs'
-import { NOTE_COLORS } from '@shared/comments.mjs'
 import { prefs } from '../prefs.js'
 
 const props = defineProps({
   items: { type: Array, default: () => [] }, // { key, top, kind: 'comment'|'composer', comment?, anchor? }
   activeKey: { type: String, default: '' },
-  composerColor: { type: String, default: 'blue' },
   expanded: { type: Boolean, default: true }, // false = slim strip of note dots; true = full cards (Word opens the pane on click)
   editRequest: { type: Object, default: () => ({ key: '', t: 0 }) } // asks a card to open its editor (right-click -> Edit note)
 })
-const emit = defineEmits(['select', 'resolve', 'save-edit', 'submit', 'cancel', 'composer-color', 'set-color', 'settled'])
+const emit = defineEmits(['select', 'resolve', 'save-edit', 'submit', 'cancel', 'reply', 'settled'])
 
 const heights = reactive({})
 const els = {}
@@ -59,7 +57,7 @@ const link = computed(() => {
   const yA = it.top // along the top edge of the text: straight across into the card's top-left corner (a bend only if the card was pushed down)
   const top = Math.min(yA, yC)
   const h = Math.abs(yA - yC)
-  return { left: x0, w: x1 - x0, top, h: h + 2, a: yA - top + 1, c: yC - top + 1 }
+  return { color: it.comment ? it.comment.color : 'blue', left: x0, w: x1 - x0, top, h: h + 2, a: yA - top + 1, c: yC - top + 1 }
 })
 const sorted = computed(() => [...props.items].sort((a, b) => a.top - b.top))
 const tops = computed(() => {
@@ -69,8 +67,8 @@ const tops = computed(() => {
   return m
 })
 
-const nameOf = (c) => (c.author === 'AI' ? 'AI' : prefs.author || 'You')
-const initialOf = (c) => (c.author === 'AI' ? 'AI' : (prefs.author || 'You').trim().charAt(0).toUpperCase())
+const nameOf = (m) => (m.author === 'AI' ? 'AI' : prefs.author || 'You')
+const initialOf = (m) => (m.author === 'AI' ? 'AI' : (prefs.author || 'You').trim().charAt(0).toUpperCase())
 
 const composerKey = computed(() => (props.items.find((i) => i.kind === 'composer') || {}).key)
 watch(composerKey, async (k) => {
@@ -98,22 +96,34 @@ function submit() {
   emit('submit', t)
   draft.value = ''
 }
+// Your own messages are edited in place (key = card key + message index); it saves when you leave the field.
 const drafts = reactive({})
-function commit(c, key) {
-  const t = (drafts[key] ?? c.text).trim()
-  delete drafts[key]
-  if (t && t !== c.text) emit('save-edit', c, t)
+const replyDrafts = reactive({})
+function commit(c, key, index) {
+  const k = key + ':' + index
+  const old = c.messages[index].text
+  const t = (drafts[k] ?? old).trim()
+  delete drafts[k]
+  if (t && t !== old) emit('save-edit', c, t, index)
 }
-function revert(key, e) {
-  delete drafts[key]
-  e.target.value = (props.items.find((i) => i.key === key) || { comment: { text: '' } }).comment.text
+function revert(key, index, e) {
+  const k = key + ':' + index
+  delete drafts[k]
+  const it = props.items.find((i) => i.key === key)
+  e.target.value = it ? it.comment.messages[index].text : ''
   e.target.blur()
+}
+function sendReply(c, key) {
+  const t = (replyDrafts[key] || '').trim()
+  if (!t) return
+  replyDrafts[key] = ''
+  emit('reply', c, t)
 }
 </script>
 
 <template>
   <aside ref="aside" class="margin" :class="{ slim: !expanded }" aria-label="Notes" @transitionend.self="emit('settled')">
-    <svg v-if="link" class="mlink" :style="{ top: link.top + 'px', left: link.left + 'px', width: link.w + 'px', height: link.h + 'px' }" :width="link.w" :height="link.h" aria-hidden="true">
+    <svg v-if="link" class="mlink" :class="'c-' + link.color" :style="{ top: link.top + 'px', left: link.left + 'px', width: link.w + 'px', height: link.h + 'px' }" :width="link.w" :height="link.h" aria-hidden="true">
       <path :d="`M0 ${link.a} H${Math.max(link.w - 14, 0)} V${link.c} H${link.w}`" fill="none" />
     </svg>
     <template v-for="it in sorted" :key="it.key">
@@ -122,11 +132,11 @@ function revert(key, e) {
         class="mdot"
         :class="['c-' + it.comment.color, { ai: it.comment.author === 'AI', side: expanded }]"
         :style="{ top: (tops[it.key] || 0) + 'px' }"
-        :title="(nameOf(it.comment)) + ': ' + it.comment.text"
+        :title="nameOf(it.comment.messages[0]) + ': ' + it.comment.text + (it.comment.messages.length > 1 ? ' (+' + (it.comment.messages.length - 1) + ' repl' + (it.comment.messages.length > 2 ? 'ies' : 'y') + ')' : '')"
         @click="emit('select', it)"
-      >{{ initialOf(it.comment) }}</button>
+      >{{ initialOf(it.comment.messages[0]) }}</button>
       <!-- new note box -->
-      <article v-else-if="it.kind === 'composer'" :ref="(el) => setEl(it.key, el)" class="mcard composer active" :class="'c-' + composerColor" :style="{ top: (tops[it.key] || 0) + 'px' }">
+      <article v-else-if="it.kind === 'composer'" :ref="(el) => setEl(it.key, el)" class="mcard composer active c-blue" :style="{ top: (tops[it.key] || 0) + 'px' }">
         <header>
           <span class="avatar">{{ (prefs.author || 'You').trim().charAt(0).toUpperCase() }}</span>
           <strong>{{ prefs.author || 'You' }}</strong>
@@ -154,24 +164,35 @@ function revert(key, e) {
         :style="{ top: (tops[it.key] || 0) + 'px' }"
         @click="emit('select', it)"
       >
-        <header>
-          <span class="avatar" :class="{ ai: it.comment.author === 'AI' }">{{ initialOf(it.comment) }}</span>
-          <strong>{{ nameOf(it.comment) }}</strong>
-          <span class="mnum">{{ it.comment.n }}</span>
-        </header>
-        <!-- the selected note's text is edited right in the card: no Edit button; it saves when you leave it or press Enter -->
+        <!-- the conversation: your messages are editable right in the card, the AI's are read-only -->
+        <div v-for="(m, mi) in it.comment.messages" :key="mi" class="msg" :class="{ ai: m.author === 'AI' }">
+          <header>
+            <span class="avatar" :class="{ ai: m.author === 'AI' }">{{ initialOf(m) }}</span>
+            <strong>{{ nameOf(m) }}</strong>
+            <span v-if="mi === 0" class="mnum">{{ it.comment.n }}</span>
+          </header>
+          <textarea
+            v-if="it.key === activeKey && m.author !== 'AI'"
+            class="mtext-edit"
+            :value="drafts[it.key + ':' + mi] ?? m.text"
+            rows="1"
+            @click.stop
+            @input="drafts[it.key + ':' + mi] = $event.target.value"
+            @blur="commit(it.comment, it.key, mi)"
+            @keydown.enter.exact.prevent="$event.target.blur()"
+            @keydown.esc.stop="revert(it.key, mi, $event)"
+          ></textarea>
+          <p v-else class="mtext">{{ m.text }}</p>
+        </div>
         <textarea
           v-if="it.key === activeKey"
-          class="mtext-edit"
-          :value="drafts[it.key] ?? it.comment.text"
+          v-model="replyDrafts[it.key]"
+          class="mreply"
           rows="1"
+          placeholder="Reply…"
           @click.stop
-          @input="drafts[it.key] = $event.target.value"
-          @blur="commit(it.comment, it.key)"
-          @keydown.enter.exact.prevent="$event.target.blur()"
-          @keydown.esc.stop="revert(it.key, $event)"
+          @keydown.enter.exact.prevent="sendReply(it.comment, it.key)"
         ></textarea>
-        <p v-else class="mtext">{{ it.comment.text }}</p>
         <footer v-if="it.key === activeKey">
           <button class="link ok" title="Resolve this note: it leaves the text and the margin (Ctrl+Z brings it back)" @click.stop="emit('resolve', it.comment)">Resolve</button>
         </footer>
