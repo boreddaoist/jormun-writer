@@ -5,6 +5,7 @@ import {
 import { parseBlocks } from '../shared/md.mjs'
 import { splitFront } from '../shared/text.mjs'
 import { stripComments, parseCommentText } from '../shared/comments.mjs'
+import { stripIdeas } from '../shared/ideas.mjs'
 
 const FONT = 'Georgia'
 const HEADINGS = [HeadingLevel.HEADING_2, HeadingLevel.HEADING_2, HeadingLevel.HEADING_3, HeadingLevel.HEADING_4, HeadingLevel.HEADING_5, HeadingLevel.HEADING_6]
@@ -137,7 +138,7 @@ export function buildMarkdown({ title, chapters, includeComments = false }) {
   const parts = [`# ${title}`]
   for (const ch of chapters) {
     let body = stripFront(ch.text).trim()
-    if (!includeComments) body = stripComments(body)
+    body = includeComments ? stripIdeas(body) : stripComments(body)
     parts.push(ch.title ? `## ${ch.title}\n\n${body}` : body)
   }
   return parts.join('\n\n') + '\n'

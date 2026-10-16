@@ -9,6 +9,7 @@
 //   {==passage==}{>>comment<<}  and  {>>comment<<}
 
 import { parseCommentText } from './comments.mjs'
+import { isIdeaLine } from './ideas.mjs'
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const escAttr = (s) => esc(s).replace(/"/g, '&quot;')
@@ -133,6 +134,7 @@ export function parseBlocks(text) {
   let list = null
   for (const line of lines) {
     if (!line.trim()) { list = null; continue }
+    if (isIdeaLine(line)) continue // rewrite ideas are not story text
     if (isRule(line)) { list = null; blocks.push({ type: 'hr' }); continue }
     let m
     if ((m = /^(#{1,6})\s+(.*)$/.exec(line))) {

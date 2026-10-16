@@ -152,7 +152,10 @@ function onNoteAction(a) {
 function onAction(action) {
   const ed = live.value
   if (!ed) return
-  if (action && typeof action === 'object') return onNoteAction(action)
+  if (action && typeof action === 'object') {
+    if (action.name === 'idea-dismiss') { if (ideaPos != null) ed.dismissIdea(ideaPos); return }
+    return onNoteAction(action)
+  }
   const name = action
   if (name === 'undo') return ed.doUndo()
   if (name === 'redo') return ed.doRedo()
@@ -227,6 +230,8 @@ function onBadge(n) {
   if (c) selectComment(c)
 }
 
+let ideaPos = null // where the last right-click landed, when it was on a rewrite idea
+
 // The main process asks this when you right-click: is the click in the editor, on a note, with text selected?
 function contextInfo(x, y) {
   const el = document.elementFromPoint(x, y)
@@ -234,7 +239,9 @@ function contextInfo(x, y) {
   const hit = el && el.closest ? el.closest('.cm-cmt[data-n], .cm-badge[data-n]') : null
   const note = hit ? Number(hit.dataset.n) : activeComment.value ? activeComment.value.n : 0
   const cur = note ? comments.value.find((x) => x.n === note) : null
-  return { editor: !!inEditor, note, color: cur ? cur.color : '', selection: !selInfo.value.empty }
+  const onIdea = !!(el && el.closest && el.closest('.cm-idea'))
+  ideaPos = onIdea && live.value ? live.value.posAtCoords(x, y) : null
+  return { editor: !!inEditor, note, color: cur ? cur.color : '', selection: !selInfo.value.empty, idea: ideaPos != null }
 }
 
 let offAction = null

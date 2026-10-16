@@ -11,7 +11,7 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
-    "test": "node --test test/sync.test.mjs test/project.test.mjs test/format.test.mjs test/comments.test.mjs test/exporter.test.mjs test/livemd.test.mjs test/contextmenu.test.mjs test/notes.test.mjs test/outline.test.mjs test/sections.test.mjs",
+    "test": "node --test test/sync.test.mjs test/project.test.mjs test/format.test.mjs test/comments.test.mjs test/exporter.test.mjs test/livemd.test.mjs test/contextmenu.test.mjs test/notes.test.mjs test/outline.test.mjs test/sections.test.mjs test/ideas.test.mjs",
     "dist": "electron-vite build && electron-builder --win nsis"
   },
   "dependencies": {

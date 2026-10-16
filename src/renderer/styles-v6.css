@@ -128,3 +128,12 @@ button.review-pill:hover { background: var(--accent-hover); }
 .zitem { padding: 5px 10px; border: 0; border-radius: 5px; background: transparent; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
 .zitem:hover { background: var(--panel-2); color: var(--text-strong); }
 .zitem.on { color: var(--accent); }
+
+/* rewrite ideas: yellow text under a paragraph, a suggestion to mimic when rewriting by hand */
+:root { --idea: #e7c75a; }
+.live-host .cm-editor .cm-line.cm-idea { color: var(--idea); font-style: italic; font-size: 0.94em; line-height: 1.55; margin: 2px 0 4px; padding-left: 14px; border-left: 2px solid color-mix(in srgb, var(--idea) 55%, transparent); position: relative; }
+.live-host .cm-editor .cm-line.cm-idea::before { content: 'Rewrite idea'; display: block; font-style: normal; font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; margin-bottom: 1px; }
+.live-host .cm-editor .cm-line.cm-idea .cm-syntax { color: color-mix(in srgb, var(--idea) 60%, transparent); font-style: normal; }
+.cm-idea-x { position: absolute; right: 0; top: 2px; padding: 0 6px; font-style: normal; font-size: 12px; color: var(--idea); opacity: 0; cursor: pointer; user-select: none; }
+.live-host .cm-editor .cm-line.cm-idea:hover .cm-idea-x { opacity: 0.7; }
+.cm-idea-x:hover { opacity: 1 !important; }

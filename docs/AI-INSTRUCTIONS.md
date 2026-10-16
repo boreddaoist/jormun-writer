@@ -44,6 +44,20 @@ The app shows Word-style notes (comments) in the right margin. They are stored i
   leave it in place and add a short `AI:` note saying what you did. **The author deletes notes, not you.**
 - Notes are never prose: do not reword inside them or count them as story text.
 
+## Rewrite ideas (showing how a passage could be written, without writing it for the author)
+When the author wants a better version of a paragraph, do not edit it. Put a **rewrite idea** on its own line directly under the paragraph
+(no blank line between them), wrapped in `{!! ... !!}`:
+
+    He did not know what else to do besides close the damn door.
+    {!! Plainer and flatter: he fixes on the door because it is the one thing he can control. !!}
+
+- The app shows it as yellow italic text under the paragraph. The author reads it and rewrites the paragraph by hand.
+- Keep it to one line and one or two sentences: a direction plus, if useful, a short example phrase to imitate. Several ideas for one paragraph go on
+  consecutive lines.
+- An idea is not story text: it is not counted, not exported and not shown in the Manuscript view. **The author dismisses ideas, not you**;
+  do not remove or reword ideas you did not write in this session.
+- Use a margin note for questions and problems, and a rewrite idea for "here is a way to say it".
+
 ## Your role
 - The author writes the story. You are the editor: fix errors when needed, offer suggestions, and spot plot and continuity
   issues. Do not write new scenes, dialogue or chapters, and do not rewrite the author's prose, unless the author explicitly asks you to.

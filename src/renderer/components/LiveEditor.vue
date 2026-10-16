@@ -9,6 +9,7 @@ import { EditorView, ViewPlugin, Decoration, WidgetType, keymap, placeholder } f
 import { history, historyKeymap, defaultKeymap, undo, redo } from '@codemirror/commands'
 import { describeLine, formatsAt, lineFormats, emptiedTokenRange } from '@shared/livemd.mjs'
 import { parseComments, resolveComment } from '@shared/comments.mjs'
+import { ideaLineRange } from '@shared/ideas.mjs'
 import { prefs } from '../prefs.js'
 
 const props = defineProps({ modelValue: { type: String, default: '' } })
@@ -35,6 +36,17 @@ class Badge extends WidgetType {
   }
   ignoreEvent() { return false }
 }
+class IdeaX extends WidgetType {
+  eq() { return true }
+  toDOM() {
+    const s = document.createElement('span')
+    s.className = 'cm-idea-x'
+    s.textContent = '\u2715'
+    s.title = 'Dismiss this rewrite idea'
+    return s
+  }
+  ignoreEvent() { return false }
+}
 class Bullet extends WidgetType {
   eq() { return true }
   toDOM() {
@@ -48,6 +60,7 @@ class Bullet extends WidgetType {
 // `kind` tells Backspace/Delete what a hidden range is: an inline mark, a line prefix, or a note marker.
 const hideInline = Decoration.replace({ kind: 'inline' })
 const hideBlock = Decoration.replace({ kind: 'block' })
+const hideIdea = Decoration.replace({ kind: 'idea' })
 const bulletDeco = Decoration.replace({ widget: new Bullet(), kind: 'block' })
 const mark = (cls) => Decoration.mark({ class: cls })
 const M = {
@@ -151,6 +164,19 @@ function build(v, comments) {
         out.push(line('cm-li').range(ln.from))
       } else if (d.type === 'hr') {
         out.push(line('cm-hr').range(ln.from))
+      } else if (d.type === 'idea') {
+        // a yellow rewrite idea under a paragraph: the {!! !!} marks are hidden, a small x dismisses it
+        out.push(line('cm-idea').range(ln.from))
+        const a = ln.from + d.prefixLen
+        const b = ln.to - d.suffixLen
+        if (onLine) {
+          push(ln.from, a, M.syn)
+          push(b, ln.to, M.syn)
+        } else {
+          if (a > ln.from) { out.push(hideIdea.range(ln.from, a)); atomic.push(hideIdea.range(ln.from, a)) }
+          if (ln.to > b) { out.push(hideIdea.range(b, ln.to)); atomic.push(hideIdea.range(b, ln.to)) }
+        }
+        out.push(Decoration.widget({ widget: new IdeaX(), side: 1 }).range(ln.to))
       }
       walk(d.nodes)
       pos = ln.to + 1
@@ -221,6 +247,12 @@ function smartDelete(v, dir) {
       v.dispatch({ changes: { from: r.from, to: r.to, insert: r.insert }, selection: { anchor: r.selEnd }, userEvent: 'delete.note' })
       return true
     }
+    if (hit.kind === 'idea') {
+      // the hidden {!! !!} of a rewrite idea: never delete half of it. An empty idea goes away, otherwise the key does nothing.
+      const ln = state.doc.lineAt(hit.from)
+      if (!ideaHasText(ln.text)) dismissIdea(ln.from)
+      return true
+    }
     if (hit.kind !== 'inline') break // heading / quote / bullet prefix: the normal Backspace removes it, which is what you want
     pos = dir < 0 ? hit.from : hit.to
     moved = true
@@ -252,6 +284,17 @@ function smartDelete(v, dir) {
   if (!moved && !token) return false
 
   v.dispatch({ changes: { from, to }, selection: { anchor: from }, userEvent: dir < 0 ? 'delete.backward' : 'delete.forward' })
+  return true
+}
+
+const ideaHasText = (t) => !!t.replace(/^\s*\{!!|!!\}\s*$/g, '').trim()
+
+function dismissIdea(pos) {
+  if (!view) return false
+  const r = ideaLineRange(view.state.doc.toString(), pos)
+  if (!r) return false
+  const anchor = Math.min(r.from, view.state.doc.length - (r.to - r.from))
+  view.dispatch({ changes: { from: r.from, to: r.to }, selection: { anchor }, userEvent: 'delete.idea' })
   return true
 }
 
@@ -290,6 +333,8 @@ onMounted(() => {
           mousedown: (e) => {
             const b = e.target && e.target.closest ? e.target.closest('.cm-badge') : null
             if (b) { emit('badge', Number(b.dataset.n)); return true }
+            const x = e.target && e.target.closest ? e.target.closest('.cm-idea-x') : null
+            if (x && view) { dismissIdea(view.posAtDOM(x)); return true }
             return false
           }
         }),
@@ -394,7 +439,8 @@ function posEndX(from, to) {
   return c ? c.right : 0
 }
 const remeasure = () => { if (view) view.requestMeasure() }
-defineExpose({ remeasure, getText, getSelection, apply, select, posTop, posEndX, focus, doUndo, doRedo, selectedText })
+const posAtCoords = (x, y) => (view ? view.posAtCoords({ x, y }) : null)
+defineExpose({ posAtCoords, dismissIdea, remeasure, getText, getSelection, apply, select, posTop, posEndX, focus, doUndo, doRedo, selectedText })
 
 // Clicking the empty area below the text puts the cursor at the end.
 function onHostMouseDown(e) {

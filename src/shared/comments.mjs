@@ -13,6 +13,8 @@
 // The colour follows who started the note: the author's notes are blue, the AI's are purple. (Old notes may carry
 // a [green]-style colour tag; it is ignored.) Notes are one line each; line breaks inside a message become spaces.
 
+import { stripIdeas } from './ideas.mjs'
+
 export const THREAD_SEP = ' ↳ '
 export const AUTHOR_COLOR = 'blue' // the Jormun ocean blue, same as the app's accent
 export const AI_COLOR = 'purple'
@@ -70,7 +72,7 @@ export function parseComments(body) {
 }
 
 export function stripComments(text) {
-  return text.replace(/\{==([^\n]*?)==\}\{>>[^\n]*?<<\}/g, '$1').replace(/\{>>[^\n]*?<<\}/g, '')
+  return stripIdeas(text).replace(/\{==([^\n]*?)==\}\{>>[^\n]*?<<\}/g, '$1').replace(/\{>>[^\n]*?<<\}/g, '')
 }
 
 // Edits below follow the same shape as format.mjs: { from, to, insert, selStart, selEnd }.

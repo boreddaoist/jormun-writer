@@ -21,6 +21,10 @@ export function editorMenuTemplate(params, deps, ctx = {}) {
   }
 
   // Notes (Word's comments): add one to the selection, or edit / delete the one under the cursor.
+  if (ctx.editor && ctx.idea) {
+    t.push({ label: 'Dismiss rewrite idea', click: send({ name: 'idea-dismiss' }) })
+    t.push({ type: 'separator' })
+  }
   if (ctx.editor) {
     if (ctx.note) {
       const n = ctx.note

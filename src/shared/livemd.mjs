@@ -1,5 +1,6 @@
 // Pure helpers for the live-preview editor (no DOM, no CodeMirror), so they can be tested.
 import { parseInline } from './md.mjs'
+import { IDEA_LINE } from './ideas.mjs'
 
 const RULE = /^\s*(?:\*\s*\*\s*\*[\s*]*|-{3,}|_{3,})\s*$/
 
@@ -8,6 +9,7 @@ const RULE = /^\s*(?:\*\s*\*\s*\*[\s*]*|-{3,}|_{3,})\s*$/
 //   -> { type: 'p'|'h'|'quote'|'ul'|'ol'|'hr', level?, prefixLen, nodes }
 export function describeLine(text, base = 0) {
   let m
+  if ((m = IDEA_LINE.exec(text))) return { type: 'idea', prefixLen: m[1].length, suffixLen: m[3].length, nodes: [] }
   if (RULE.test(text)) return { type: 'hr', prefixLen: 0, nodes: [] }
   if ((m = /^(#{1,6})\s+/.exec(text))) {
     return { type: 'h', level: m[1].length, prefixLen: m[0].length, nodes: parseInline(text.slice(m[0].length), base + m[0].length) }
