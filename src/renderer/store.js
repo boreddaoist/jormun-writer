@@ -3,6 +3,7 @@ import * as S from '@shared/sync.mjs'
 import { splitFront, parseFront, countWords, baseName, nextChapterNumber, isChapter } from '@shared/text.mjs'
 import { extractHeadings, visibleOutline } from '@shared/outline.mjs'
 import { addChapter } from '@shared/sections.mjs'
+import { findMatches, replaceAllIn } from '@shared/find.mjs'
 
 const api = window.jormun
 const SAVE_DELAY_MS = 700
@@ -314,6 +315,25 @@ export async function restoreDeleted(rel) {
   await save(rel, true)
 }
 
+// ---------- find and replace across the project ----------
+// Replace in every listed file. Each change goes through the normal edit path, so it autosaves, shows in the version
+// history and can be restored.
+export function replaceInProject(query, replacement, opts, list) {
+  let files = 0
+  let count = 0
+  for (const rel of list) {
+    const f = state.files[rel]
+    if (!f) continue
+    const r = replaceAllIn(f.buffer, query, replacement, opts)
+    if (!r.count) continue
+    edit(rel, r.text)
+    files++
+    count += r.count
+  }
+  return { files, count }
+}
+export const searchProject = (query, opts, list) => list.map((rel) => ({ rel, text: state.files[rel].buffer, matches: findMatches(state.files[rel].buffer, query, opts) })).filter((r) => r.matches.length)
+
 // ---------- chapters ----------
 export async function newChapter() {
   if (!state.project) return
@@ -404,4 +424,4 @@ export function subscribe() {
 }
 
 // Test hook: lets the automated checks drive the same functions the menus call.
-if (typeof window !== 'undefined') window.__jwStore = { state, sectionOp, newChapter, mergeChapters, saveProjectAs, outline, edit, openDialog, restoreVersion }
+if (typeof window !== 'undefined') window.__jwStore = { state, sectionOp, newChapter, mergeChapters, saveProjectAs, outline, edit, openDialog, restoreVersion, replaceInProject }

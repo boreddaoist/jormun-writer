@@ -4,7 +4,7 @@
 // and the {==  ==}{>> <<} of a note) stay hidden, like in Word. The "Show formatting marks" setting reveals the
 // ones under the cursor, like Obsidian's live preview.
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import { EditorState, EditorSelection, Annotation, Transaction, Facet, Compartment } from '@codemirror/state'
+import { EditorState, EditorSelection, Annotation, Transaction, Facet, Compartment, StateField, StateEffect } from '@codemirror/state'
 import { EditorView, ViewPlugin, Decoration, WidgetType, keymap, placeholder } from '@codemirror/view'
 import { history, historyKeymap, defaultKeymap, undo, redo } from '@codemirror/commands'
 import { describeLine, formatsAt, lineFormats, emptiedTokenRange } from '@shared/livemd.mjs'
@@ -22,6 +22,20 @@ const External = Annotation.define()
 // Whether to show the Markdown marks under the cursor (off by default).
 const revealFacet = Facet.define({ combine: (v) => (v.length ? v[0] : false) })
 const revealComp = new Compartment()
+
+// ---------- find highlights ----------
+// The find bar hands over the matches; they are drawn as marks (the current one stronger) and follow edits.
+const setFindEffect = StateEffect.define()
+const findMark = Decoration.mark({ class: 'cm-find' })
+const findCur = Decoration.mark({ class: 'cm-find cm-find-cur' })
+const findField = StateField.define({
+  create: () => Decoration.none,
+  update(value, tr) {
+    for (const e of tr.effects) if (e.is(setFindEffect)) return e.value
+    return value.map(tr.changes)
+  },
+  provide: (f) => EditorView.decorations.from(f)
+})
 
 // ---------- widgets ----------
 class Badge extends WidgetType {
@@ -329,6 +343,7 @@ onMounted(() => {
         placeholder('Start writing…'),
         revealComp.of(revealFacet.of(prefs.reveal)),
         livePlugin,
+        findField,
         EditorView.domEventHandlers({
           mousedown: (e) => {
             const b = e.target && e.target.closest ? e.target.closest('.cm-badge') : null
@@ -439,8 +454,27 @@ function posEndX(from, to) {
   return c ? c.right : 0
 }
 const remeasure = () => { if (view) view.requestMeasure() }
+// Show the find matches ([{ from, to }], `current` = index of the strong one), or clear them with an empty list.
+function setFind(ranges, current = -1) {
+  if (!view) return
+  const len = view.state.doc.length
+  const marks = ranges
+    .filter((r) => r.to > r.from && r.to <= len)
+    .map((r, i) => (i === current ? findCur : findMark).range(r.from, r.to))
+  view.dispatch({ effects: setFindEffect.of(Decoration.set(marks, true)) })
+}
+// Scroll to a range without taking the keyboard focus (the find box keeps it).
+function reveal(from, to) {
+  if (!view) return
+  view.dispatch({ effects: EditorView.scrollIntoView(Math.min(from, view.state.doc.length), { y: 'center', yMargin: 80 }) })
+}
+// Replace several ranges in one step (so Ctrl+Z undoes them together).
+function replaceRanges(ranges, text) {
+  if (!view || !ranges.length) return
+  view.dispatch({ changes: ranges.map((r) => ({ from: r.from, to: r.to, insert: text })), userEvent: 'input.replace' })
+}
 const posAtCoords = (x, y) => (view ? view.posAtCoords({ x, y }) : null)
-defineExpose({ posAtCoords, dismissIdea, remeasure, getText, getSelection, apply, select, posTop, posEndX, focus, doUndo, doRedo, selectedText })
+defineExpose({ setFind, reveal, replaceRanges, posAtCoords, dismissIdea, remeasure, getText, getSelection, apply, select, posTop, posEndX, focus, doUndo, doRedo, selectedText })
 
 // Clicking the empty area below the text puts the cursor at the end.
 function onHostMouseDown(e) {

@@ -5,6 +5,7 @@ import * as fmt from '@shared/format.mjs'
 import { extractHeadings } from '@shared/outline.mjs'
 import { deleteSection, moveSection, headingTextRange } from '@shared/sections.mjs'
 import { stripComments } from '@shared/comments.mjs'
+import { findMatches } from '@shared/find.mjs'
 import { parseComments, addComment, addReply, resolveComment, editComment } from '@shared/comments.mjs'
 import { state, edit, save, titleOf, setNav, toast } from '../store.js'
 import { prefs, stepZoom } from '../prefs.js'
@@ -230,6 +231,72 @@ function onBadge(n) {
   if (c) selectComment(c)
 }
 
+// ---- find bar (Ctrl+F) ----
+const findOpen = ref(false)
+const findInput = ref(null)
+const fq = ref('')
+const rq = ref('')
+const matchCase = ref(false)
+const wholeWord = ref(false)
+const cur = ref(0)
+const matches = computed(() => (findOpen.value ? findMatches(body.value, fq.value, { matchCase: matchCase.value, wholeWord: wholeWord.value }) : []))
+const findCount = computed(() => (fq.value ? (matches.value.length ? `${Math.min(cur.value, matches.value.length - 1) + 1} of ${matches.value.length}` : 'No matches') : ''))
+function paintFind() {
+  if (!live.value) return
+  if (!findOpen.value) return live.value.setFind([])
+  const i = matches.value.length ? Math.min(cur.value, matches.value.length - 1) : -1
+  live.value.setFind(matches.value, i)
+}
+watch([matches, cur, findOpen], paintFind)
+watch([fq, matchCase, wholeWord], () => {
+  cur.value = nearest()
+  const m = matches.value[cur.value]
+  if (m && live.value) live.value.reveal(m.from, m.to)
+})
+// the first match at or after the caret, so typing a query jumps to what is next, not back to the top
+function nearest() {
+  const ms = matches.value
+  if (!ms.length) return 0
+  const head = selInfo.value.head || 0
+  const i = ms.findIndex((m) => m.from >= head)
+  return i === -1 ? 0 : i
+}
+function openFind() {
+  const sel = selInfo.value
+  if (sel && !sel.empty && live.value) {
+    const t = live.value.selectedText()
+    if (t && t.length < 80 && !t.includes('\n')) fq.value = t
+  }
+  findOpen.value = true
+  nextTick(() => { findInput.value && findInput.value.focus(); findInput.value && findInput.value.select() })
+}
+function closeFind() {
+  findOpen.value = false
+  live.value && live.value.focus()
+}
+function stepFind(dir) {
+  const n = matches.value.length
+  if (!n) return
+  cur.value = (Math.min(cur.value, n - 1) + dir + n) % n
+  const m = matches.value[cur.value]
+  live.value.reveal(m.from, m.to)
+}
+function replaceOne() {
+  const n = matches.value.length
+  if (!n || !live.value) return
+  const m = matches.value[Math.min(cur.value, n - 1)]
+  live.value.replaceRanges([m], rq.value)
+  // the matches are recomputed from the new text; stay on the same position, which is now the next match
+  nextTick(() => { const k = matches.value.length; if (k) { cur.value = Math.min(cur.value, k - 1); const nm = matches.value[cur.value]; live.value.reveal(nm.from, nm.to) } })
+}
+function replaceEvery() {
+  const n = matches.value.length
+  if (!n || !live.value) return
+  live.value.replaceRanges(matches.value, rq.value)
+  toast(n === 1 ? 'Replaced 1 match.' : `Replaced ${n} matches.`)
+}
+const onFindEvent = () => openFind()
+
 let ideaPos = null // where the last right-click landed, when it was on a rewrite idea
 
 // The main process asks this when you right-click: is the click in the editor, on a note, with text selected?
@@ -249,9 +316,11 @@ onMounted(() => {
   window.addEventListener('resize', bump)
   offAction = window.jormun.onEditorAction((a) => onAction(a))
   window.__jwCtx = contextInfo
+  window.addEventListener('jw:find', onFindEvent)
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', bump)
+  window.removeEventListener('jw:find', onFindEvent)
   if (window.__jwCtx === contextInfo) delete window.__jwCtx
   if (offAction) offAction()
   if (raf) cancelAnimationFrame(raf)
@@ -274,6 +343,22 @@ const saveLabel = computed(() => {
       @action="onAction"
     />
     <ReviewBar :rel="rel" :file="file" />
+    <div v-if="findOpen" class="findbar" @keydown.esc.stop.prevent="closeFind">
+      <div class="frow">
+        <input ref="findInput" v-model="fq" type="text" placeholder="Find" spellcheck="false" @keydown.enter.prevent="stepFind($event.shiftKey ? -1 : 1)" />
+        <span class="fcount">{{ findCount }}</span>
+        <button class="fbtn" title="Previous (Shift+Enter)" @click="stepFind(-1)">&#8593;</button>
+        <button class="fbtn" title="Next (Enter)" @click="stepFind(1)">&#8595;</button>
+        <button class="fbtn" :class="{ on: matchCase }" title="Match case" @click="matchCase = !matchCase">Aa</button>
+        <button class="fbtn" :class="{ on: wholeWord }" title="Whole word" @click="wholeWord = !wholeWord">ab</button>
+        <button class="fbtn" title="Close (Esc)" @click="closeFind">&#10005;</button>
+      </div>
+      <div class="frow">
+        <input v-model="rq" type="text" placeholder="Replace with" spellcheck="false" @keydown.enter.prevent="replaceOne" />
+        <button class="fbtn wide" :disabled="!matches.length" @click="replaceOne">Replace</button>
+        <button class="fbtn wide" :disabled="!matches.length" @click="replaceEvery">Replace all</button>
+      </div>
+    </div>
     <div class="page-scroll" @wheel="onWheel">
       <div ref="row" class="page-row">
         <div class="page-col">
