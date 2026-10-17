@@ -6,6 +6,7 @@ import { extractHeadings } from '@shared/outline.mjs'
 import { deleteSection, moveSection, headingTextRange } from '@shared/sections.mjs'
 import { stripComments } from '@shared/comments.mjs'
 import { findMatches } from '@shared/find.mjs'
+import { isIdeaLine } from '@shared/ideas.mjs'
 import { parseComments, addComment, addReply, resolveComment, editComment } from '@shared/comments.mjs'
 import { state, edit, save, titleOf, setNav, toast } from '../store.js'
 import { prefs, stepZoom } from '../prefs.js'
@@ -37,7 +38,8 @@ const selWords = computed(() => {
 })
 const comments = computed(() => parseComments(body.value))
 
-const showMargin = computed(() => prefs.margin && (comments.value.length > 0 || !!composing.value))
+const ideaCount = computed(() => body.value.split('\n').filter(isIdeaLine).length)
+const showMargin = computed(() => prefs.margin && !prefs.hideNotes && (comments.value.length > 0 || !!composing.value))
 const activeComment = computed(() => comments.value.find((c) => selInfo.value.head >= c.from && selInfo.value.head <= c.to))
 const activeKey = computed(() => (composing.value ? 'composer' : activeComment.value ? 'c' + activeComment.value.n : ''))
 
@@ -337,7 +339,7 @@ const saveLabel = computed(() => {
 </script>
 
 <template>
-  <section v-if="file" class="editor">
+  <section v-if="file" class="editor" :class="{ 'hide-annot': prefs.hideNotes }">
     <Toolbar
       :formats="selInfo.formats"
       @action="onAction"
@@ -403,6 +405,13 @@ const saveLabel = computed(() => {
       </div>
     </div>
     <div class="statusbar">
+      <button
+        v-if="comments.length || ideaCount"
+        class="annot-toggle"
+        :class="{ on: prefs.hideNotes }"
+        :title="prefs.hideNotes ? 'Show the notes and rewrite ideas again' : 'Hide the notes and yellow rewrite ideas while you write'"
+        @click="prefs.hideNotes = !prefs.hideNotes"
+      >{{ prefs.hideNotes ? 'Show notes and ideas' : 'Hide notes and ideas' }}<span class="annot-n">{{ comments.length }} notes · {{ ideaCount }} ideas</span></button>
       <div class="wordcount" title="Words in this document (notes are not counted)">
         <template v-if="selWords">{{ selWords.toLocaleString() }} of </template>{{ words.toLocaleString() }} words
       </div>

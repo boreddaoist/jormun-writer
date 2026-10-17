@@ -203,3 +203,12 @@ button.review-all:hover { background: var(--panel-2); color: var(--text-strong);
 .np-resolve { margin-left: auto; padding: 1px 8px; border: 1px solid var(--line-2); border-radius: 999px; background: transparent; color: var(--muted); font: inherit; font-size: 11px; cursor: pointer; }
 .np-resolve:hover { color: var(--text-strong); background: var(--panel-2); }
 .np-bulk { margin: 6px 4px 0; width: calc(100% - 8px); }
+
+/* hiding the notes and the yellow rewrite ideas while writing */
+.hide-annot .cm-line.cm-idea { display: none; }
+.hide-annot .cm-cmt.on { background: transparent; }
+.hide-annot .cm-badge { display: none; }
+.annot-toggle { display: inline-flex; align-items: center; gap: 8px; padding: 4px 11px; background: var(--panel); border: 1px solid var(--line-2); border-radius: 999px; color: var(--muted); font: inherit; font-size: 12px; cursor: pointer; }
+.annot-toggle:hover { color: var(--text-strong); background: var(--panel-2); }
+.annot-toggle.on { color: var(--accent); border-color: var(--accent); }
+.annot-n { color: var(--muted); font-size: 11px; opacity: 0.8; }
