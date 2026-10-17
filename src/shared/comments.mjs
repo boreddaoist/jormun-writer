@@ -71,6 +71,16 @@ export function parseComments(body) {
   return out
 }
 
+// Where a conversation stands. `waiting` = the AI spoke last, so it is waiting for the author.
+//   started: 'AI' | 'you'     who wrote the first message
+//   last:    'AI' | 'you'     who wrote the last message
+export function threadStatus(c) {
+  const msgs = c.messages && c.messages.length ? c.messages : [{ author: c.author }]
+  const started = msgs[0].author === 'AI' ? 'AI' : 'you'
+  const last = msgs[msgs.length - 1].author === 'AI' ? 'AI' : 'you'
+  return { started, last, waiting: last === 'AI', replies: msgs.length - 1 }
+}
+
 export function stripComments(text) {
   return stripIdeas(text).replace(/\{==([^\n]*?)==\}\{>>[^\n]*?<<\}/g, '$1').replace(/\{>>[^\n]*?<<\}/g, '')
 }

@@ -3,9 +3,10 @@
 // Click a heading to jump to it; sections fold; the heading you are working under is highlighted.
 import {
   state, visibleNav, activeNavId, manuscriptWords, toggleFold, goToHeading,
-  newChapter, showManuscript, openDialog
+  newChapter, showManuscript, openDialog, notesWaiting, activeNotes
 } from '../store.js'
-import { toggleSidebar } from '../prefs.js'
+import { prefs, toggleSidebar } from '../prefs.js'
+import NotesPanel from './NotesPanel.vue'
 
 defineProps({ collapsed: Boolean })
 
@@ -40,7 +41,15 @@ const menu = (kind, info) => window.jormun.fileMenu(kind, info)
         <button class="icon" title="Add a chapter (Ctrl+N)" @click="newChapter">+</button>
       </div>
 
-      <ul class="nav">
+      <div class="side-tabs" role="tablist">
+        <button role="tab" :aria-selected="prefs.sideTab === 'nav'" :class="{ on: prefs.sideTab === 'nav' }" @click="prefs.sideTab = 'nav'">Headings</button>
+        <button role="tab" :aria-selected="prefs.sideTab === 'notes'" :class="{ on: prefs.sideTab === 'notes' }" @click="prefs.sideTab = 'notes'">
+          Notes<span v-if="activeNotes.length" class="tabcount" :class="{ hot: notesWaiting }" :title="notesWaiting ? notesWaiting + ' waiting for your answer' : activeNotes.length + ' notes'">{{ notesWaiting || activeNotes.length }}</span>
+        </button>
+      </div>
+
+      <NotesPanel v-if="prefs.sideTab === 'notes'" />
+      <ul v-else class="nav">
         <li
           v-for="(e, i) in visibleNav"
           :key="e.id"

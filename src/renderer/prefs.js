@@ -35,7 +35,7 @@ export const ACCENTS = {
 const KEY = 'jw.prefs'
 const defaults = {
   font: 'lato', size: 20, lineHeight: 1.7, width: 980, zoom: 100, sidebar: true, author: '', margin: true,
-  accent: 'ocean',
+  accent: 'ocean', sideTab: 'nav',
   reveal: false // show the Markdown marks (** # >) under the cursor; off = they stay hidden like in Word
 }
 
@@ -54,6 +54,7 @@ function load() {
     p.margin = true // the notes margin is always on (no toggle any more)
     p.accent = ACCENTS[p.accent] ? p.accent : defaults.accent
     p.reveal = p.reveal === true
+    p.sideTab = p.sideTab === 'notes' ? 'notes' : 'nav'
     return p
   } catch {
     return { ...defaults }
@@ -77,7 +78,7 @@ watchEffect(() => {
   try {
     localStorage.setItem(KEY, JSON.stringify({
       font: prefs.font, size: prefs.size, lineHeight: prefs.lineHeight, width: prefs.width, zoom: prefs.zoom, sidebar: prefs.sidebar,
-      author: prefs.author, margin: prefs.margin, accent: prefs.accent, reveal: prefs.reveal
+      author: prefs.author, margin: prefs.margin, accent: prefs.accent, reveal: prefs.reveal, sideTab: prefs.sideTab
     }))
   } catch { /* preferences are a convenience; the app works without storage */ }
 })

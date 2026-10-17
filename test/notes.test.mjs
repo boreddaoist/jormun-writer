@@ -89,3 +89,12 @@ test('Word export: the first message is the comment, replies follow with who sai
   assert.deepEqual(texts, ['check the hair', 'Jun: it is black', 'AI: ok', 'mine'])
   assert.ok(xml.includes('w:author="AI"') && xml.includes('w:author="Jun"'))
 })
+
+import { threadStatus } from '../src/shared/comments.mjs'
+test('thread status says who spoke first and whether the AI is waiting for the author', () => {
+  const st = (raw) => threadStatus(parseComments('x {>>' + raw + '<<} y')[0])
+  assert.deepEqual(st('AI: why?'), { started: 'AI', last: 'AI', waiting: true, replies: 0 })
+  assert.deepEqual(st('AI: why? \u21b3 because'), { started: 'AI', last: 'you', waiting: false, replies: 1 })
+  assert.deepEqual(st('mine'), { started: 'you', last: 'you', waiting: false, replies: 0 })
+  assert.deepEqual(st('mine \u21b3 AI: ok'), { started: 'you', last: 'AI', waiting: true, replies: 1 })
+})

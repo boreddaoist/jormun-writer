@@ -179,3 +179,27 @@ button.review-all:hover { background: var(--panel-2); color: var(--text-strong);
 .fp-hit { display: block; width: 100%; padding: 4px 8px; border: 0; border-radius: 6px; background: transparent; color: var(--text); font: inherit; font-size: 12.5px; text-align: left; cursor: pointer; }
 .fp-hit:hover { background: var(--panel-2); }
 .fp-hit mark { background: rgba(231, 199, 90, 0.4); color: var(--text-strong); border-radius: 2px; }
+
+/* sidebar tabs and the notes list */
+.side-tabs { display: flex; gap: 4px; margin: 2px 4px 6px; padding: 3px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+.side-tabs button { flex: 1; padding: 4px 8px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font: inherit; font-size: 12.5px; cursor: pointer; }
+.side-tabs button:hover { color: var(--text-strong); }
+.side-tabs button.on { background: var(--panel-3); color: var(--text-strong); }
+.tabcount { margin-left: 6px; padding: 0 6px; border-radius: 999px; background: var(--panel-2); color: var(--muted); font-size: 11px; font-weight: 700; }
+.tabcount.hot { background: #7b5fd3; color: #fff; }
+.np-filters { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 4px 6px; }
+.np-filters button { padding: 2px 9px; border: 1px solid var(--line-2); border-radius: 999px; background: transparent; color: var(--muted); font: inherit; font-size: 11.5px; cursor: pointer; }
+.np-filters button.on { border-color: var(--accent); color: var(--text-strong); }
+.np-list { list-style: none; margin: 0; padding: 0; }
+.np-item { display: block !important; padding: 7px 8px !important; margin: 0 0 2px; border-radius: 8px; }
+.np-top { display: flex; align-items: center; gap: 6px; }
+.np-dot { width: 8px; height: 8px; border-radius: 50%; background: #4aa3f0; flex: none; }
+.np-dot.ai { background: #a07be8; }
+.np-anchor { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-size: 11.5px; font-style: italic; }
+.np-text { margin: 3px 0 4px; color: var(--text); font-size: 12.5px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.np-foot { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+.np-chip { padding: 0 7px; border-radius: 999px; background: var(--panel-2); }
+.np-chip.wait { background: rgba(123, 95, 211, 0.28); color: #cdbbff; }
+.np-resolve { margin-left: auto; padding: 1px 8px; border: 1px solid var(--line-2); border-radius: 999px; background: transparent; color: var(--muted); font: inherit; font-size: 11px; cursor: pointer; }
+.np-resolve:hover { color: var(--text-strong); background: var(--panel-2); }
+.np-bulk { margin: 6px 4px 0; width: calc(100% - 8px); }

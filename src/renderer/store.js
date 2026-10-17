@@ -4,6 +4,7 @@ import { splitFront, parseFront, countWords, baseName, nextChapterNumber, isChap
 import { extractHeadings, visibleOutline } from '@shared/outline.mjs'
 import { addChapter } from '@shared/sections.mjs'
 import { findMatches, replaceAllIn } from '@shared/find.mjs'
+import { parseComments, resolveComment, threadStatus } from '@shared/comments.mjs'
 
 const api = window.jormun
 const SAVE_DELAY_MS = 700
@@ -313,6 +314,37 @@ export async function restoreDeleted(rel) {
   const f = state.files[rel]
   if (!f) return
   await save(rel, true)
+}
+
+// ---------- notes of the open file (the Notes list in the sidebar) ----------
+export const activeNotes = computed(() => {
+  const f = state.active ? state.files[state.active] : null
+  if (!f) return []
+  return parseComments(splitFront(f.buffer).body)
+})
+// notes where the AI spoke last: it is waiting for your answer
+export const notesWaiting = computed(() => activeNotes.value.filter((c) => threadStatus(c).waiting).length)
+
+// Resolve notes (remove the marker, keep the passage). They are matched again against the current text, from the end of
+// the file backwards so earlier positions stay valid.
+export function resolveNotes(rel, list) {
+  const f = state.files[rel]
+  if (!f || !list.length) return 0
+  const { front, body } = splitFront(f.buffer)
+  const fresh = parseComments(body)
+  const targets = []
+  for (const c of list) {
+    const hit = fresh.find((x) => x.from === c.from && x.raw === c.raw) || fresh.find((x) => x.raw === c.raw && x.anchor === c.anchor)
+    if (hit && !targets.includes(hit)) targets.push(hit)
+  }
+  targets.sort((a, b) => b.from - a.from)
+  let text = body
+  for (const c of targets) {
+    const r = resolveComment(c)
+    text = text.slice(0, r.from) + r.insert + text.slice(r.to)
+  }
+  if (targets.length) edit(rel, front + text)
+  return targets.length
 }
 
 // ---------- find and replace across the project ----------
