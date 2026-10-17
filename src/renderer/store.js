@@ -273,6 +273,16 @@ export function acceptChange(rel) {
   if (f) patch(rel, S.acceptPending(f))
 }
 
+// Keep every outside edit that is waiting. Files with a two-sided conflict need your own decision and are left alone.
+export function acceptAll() {
+  let n = 0
+  for (const rel of Object.keys(state.files)) {
+    const f = state.files[rel]
+    if (f.pending && !f.conflict) { patch(rel, S.acceptPending(f)); n++ }
+  }
+  if (n) toast(n === 1 ? 'Kept 1 outside edit.' : `Kept ${n} outside edits.`)
+}
+
 export async function rejectChange(rel) {
   const f = state.files[rel]
   if (!f) return

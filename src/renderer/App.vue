@@ -2,7 +2,7 @@
 import { computed, onMounted, onBeforeUnmount } from 'vue'
 import {
   state, startup, subscribe, pickProject, saveAll, reviewCount,
-  newChapter, sectionOp, openDialog, openRecent, setActive, saveState, SAVE_LABELS, openNextReview
+  newChapter, sectionOp, openDialog, openRecent, setActive, saveState, SAVE_LABELS, openNextReview, acceptAll
 } from './store.js'
 import { prefs, toggleSidebar, stepZoom, setZoom } from './prefs.js'
 import { baseName } from '@shared/text.mjs'
@@ -84,6 +84,7 @@ onBeforeUnmount(() => {
         <span class="sdot"></span><span>{{ SAVE_LABELS[saveState] }}</span>
       </button>
       <button v-if="reviewCount" class="review-pill" title="Open the next file with changes waiting for your decision" @click="openNextReview">{{ reviewCount }} to review</button>
+      <button v-if="reviewCount" class="review-all" title="Keep every outside edit that is waiting (files with a conflict are skipped)" @click="acceptAll">Keep all</button>
     </header>
 
     <main v-if="state.project" class="body" :class="{ sbc: !prefs.sidebar }">
