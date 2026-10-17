@@ -18,7 +18,7 @@ change appears in the app as a **keep / undo** diff, and your own typing is neve
   to jump, fold what you are not working on, reorder or delete a section from the right-click menu.
 - **Notes in the margin, like Word comments.** Select a passage, right-click, add a note. The AI leaves its questions
   and suggestions the same way (marked **AI**) instead of rewriting your prose. You resolve them when you are done.
-- **Rewrite ideas, never rewrites.** When a paragraph could be stronger, the AI leaves a short yellow suggestion right under it, a direction and a phrase to imitate, and you rewrite it your own way. Dismiss it with one click. It is never counted or exported.
+- **Rewrite ideas, never rewrites.** When a paragraph could be stronger, the AI shows a proposed rewrite in yellow right under it. You read it, rewrite the paragraph your own way, and dismiss it with one click. It never touches your text and is never counted or exported.
 - **The AI proposes, you decide.** Every outside edit is a diff you can keep or undo. If you are typing in the same
   place, the app asks which version to keep and nothing is lost.
 - **Live word count** at the bottom right ("2 of 149 words" while you have text selected), a clean dark interface, and fonts, size, line spacing and page width you can set.

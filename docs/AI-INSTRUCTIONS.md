@@ -44,19 +44,21 @@ The app shows Word-style notes (comments) in the right margin. They are stored i
   leave it in place and add a short `AI:` note saying what you did. **The author deletes notes, not you.**
 - Notes are never prose: do not reword inside them or count them as story text.
 
-## Rewrite ideas (showing how a passage could be written, without writing it for the author)
-When the author wants a better version of a paragraph, do not edit it. Put a **rewrite idea** on its own line directly under the paragraph
-(no blank line between them), wrapped in `{!! ... !!}`:
+## Rewrite ideas (a proposed rewrite shown next to the author's text, never put into it)
+When a paragraph could be stronger, or the author asks how to write something, do not edit it. Write a proposed rewrite of that paragraph as a
+**rewrite idea**: one line directly under the paragraph (no blank line between them), wrapped in `{!! ... !!}`:
 
     He did not know what else to do besides close the damn door.
-    {!! Plainer and flatter: he fixes on the door because it is the one thing he can control. !!}
+    {!! He did not know what else to do. Closing a door was a task, and a stranger robbing him was not, so he stayed with the task. !!}
 
-- The app shows it as yellow italic text under the paragraph. The author reads it and rewrites the paragraph by hand.
-- Keep it to one line and one or two sentences: a direction plus, if useful, a short example phrase to imitate. Several ideas for one paragraph go on
-  consecutive lines.
+- The app shows it as yellow italic text under the paragraph. The author reads it and rewrites the paragraph by hand, mimicking what works.
+  Never paste it into the story yourself.
+- Write the actual rewrite, in the author's voice and register, using what is decided in the notes (characters, canon, tone). It should read like
+  the paragraph would, not like advice. Keep the author's meaning and facts unless you also leave a note saying why you changed them.
+- One paragraph per idea, on one line. Several alternatives go on consecutive lines.
 - An idea is not story text: it is not counted, not exported and not shown in the Manuscript view. **The author dismisses ideas, not you**;
   do not remove or reword ideas you did not write in this session.
-- Use a margin note for questions and problems, and a rewrite idea for "here is a way to say it".
+- Use a margin note for questions and problems, and a rewrite idea for "here is a way it could read".
 
 ## Your role
 - The author writes the story. You are the editor: fix errors when needed, offer suggestions, and spot plot and continuity
