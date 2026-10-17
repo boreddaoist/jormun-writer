@@ -223,12 +223,14 @@ function scheduleSave(rel) {
   f.timer = setTimeout(() => save(rel), SAVE_DELAY_MS)
 }
 
-export async function save(rel) {
+// `restore` is only for "Save it again": a file that was deleted or renamed from outside must NOT come back on its own
+// (saveAll runs on every window blur, and it used to recreate such files from the stale buffer).
+export async function save(rel, restore = false) {
   const f = state.files[rel]
   if (!f || f.conflict || f.saving) return
   clearTimeout(f.timer)
   const text = f.buffer
-  if (text === f.disk && !f.deleted) return
+  if (text === f.disk && !(f.deleted && restore)) return
   f.saving = true
   f.error = ''
   try {
@@ -289,7 +291,7 @@ export async function resolveConflict(rel, choice) {
 export async function restoreDeleted(rel) {
   const f = state.files[rel]
   if (!f) return
-  await save(rel)
+  await save(rel, true)
 }
 
 // ---------- chapters ----------

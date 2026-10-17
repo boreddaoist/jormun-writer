@@ -1,6 +1,6 @@
 {
   "name": "jormun-writer",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "description": "Jormun Writer – a folder-of-Markdown novel writer that an AI can edit in VS Code while you keep writing",
   "main": "dist-electron/main/index.js",
