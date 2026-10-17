@@ -8,6 +8,8 @@
 //   pending   null | { from, to }   an outside edit waiting for review
 //   conflict  null | { mine, theirs } outside edit arrived while we had unsaved typing
 
+import { analyze, applyKeep, applyUndo } from './hunks.mjs'
+
 export function initState(text) {
   return { baseline: text, disk: text, buffer: text, pending: null, conflict: null, deleted: false }
 }
@@ -61,6 +63,28 @@ export function rejectPending(s) {
   if (!s.pending) return s
   const from = s.pending.from
   return { ...s, buffer: from, baseline: from, pending: null }
+}
+
+// Keep one change of the pending review: it joins the version you own; the rest stays up for review.
+export function keepHunk(s, i) {
+  if (!s.pending) return s
+  const { hunks } = analyze(s.pending.from, s.pending.to)
+  const h = hunks[i]
+  if (!h) return s
+  const from = applyKeep(s.pending.from, h)
+  if (from === s.pending.to) return { ...s, baseline: s.pending.to, pending: null }
+  return { ...s, pending: { from, to: s.pending.to } }
+}
+
+// Undo one change of the pending review. The caller must write `buffer` to disk afterwards (it now differs from disk).
+export function undoHunk(s, i) {
+  if (!s.pending) return s
+  const { hunks } = analyze(s.pending.from, s.pending.to)
+  const h = hunks[i]
+  if (!h) return s
+  const to = applyUndo(s.pending.to, h)
+  if (to === s.pending.from) return { ...s, buffer: to, baseline: to, pending: null }
+  return { ...s, buffer: to, pending: { from: s.pending.from, to } }
 }
 
 export function resolveConflict(s, choice) {

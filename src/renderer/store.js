@@ -285,6 +285,18 @@ export function acceptAll() {
   if (n) toast(n === 1 ? 'Kept 1 outside edit.' : `Kept ${n} outside edits.`)
 }
 
+// One change of an outside edit, by its number in the review.
+export function keepChange(rel, i) {
+  const f = state.files[rel]
+  if (f) patch(rel, S.keepHunk(f, i))
+}
+export async function undoChange(rel, i) {
+  const f = state.files[rel]
+  if (!f) return
+  patch(rel, S.undoHunk(f, i))
+  await save(rel)
+}
+
 export async function rejectChange(rel) {
   const f = state.files[rel]
   if (!f) return

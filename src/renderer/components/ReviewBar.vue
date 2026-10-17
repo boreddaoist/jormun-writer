@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import DiffView from './DiffView.vue'
-import { acceptChange, rejectChange, resolveConflict, restoreDeleted } from '../store.js'
+import { acceptChange, rejectChange, resolveConflict, restoreDeleted, keepChange, undoChange } from '../store.js'
 
 const props = defineProps({ rel: String, file: Object })
 const open = ref(true)
@@ -25,7 +25,7 @@ const mode = computed(() => {
         <button class="btn" @click="rejectChange(rel)">Undo AI changes</button>
         <button class="btn primary" @click="acceptChange(rel)">Keep</button>
       </div>
-      <DiffView v-if="open" :from="file.pending.from" :to="file.pending.to" />
+      <DiffView v-if="open" :from="file.pending.from" :to="file.pending.to" actions @keep="(i) => keepChange(rel, i)" @undo="(i) => undoChange(rel, i)" />
     </template>
 
     <template v-else-if="mode === 'conflict'">
