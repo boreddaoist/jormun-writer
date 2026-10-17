@@ -4,6 +4,7 @@ import { splitFront, parseFront, countWords, baseName, nextChapterNumber, isChap
 import { extractHeadings, visibleOutline } from '@shared/outline.mjs'
 import { addChapter } from '@shared/sections.mjs'
 import { findMatches, replaceAllIn } from '@shared/find.mjs'
+import { cardIndex } from '@shared/cards.mjs'
 import { parseComments, resolveComment, threadStatus } from '@shared/comments.mjs'
 
 const api = window.jormun
@@ -19,6 +20,7 @@ export const state = reactive({
   jump: { rel: '', pos: 0, t: 0 }, // "go to this heading" request, picked up by the editor
   op: { rel: '', pos: 0, name: '', t: 0 }, // "rename / move / delete this section" request, picked up by the editor
   toasts: [],
+  lastSaved: 0, // when the app last wrote a file, shown next to Saved
   loading: true
 })
 
@@ -238,6 +240,7 @@ export async function save(rel, restore = false) {
   try {
     await api.writeFile(rel, text)
     patch(rel, S.onSaved(f, text))
+    state.lastSaved = Date.now()
   } catch (e) {
     f.error = String(e.message || e)
   } finally {
@@ -327,6 +330,9 @@ export async function restoreDeleted(rel) {
   if (!f) return
   await save(rel, true)
 }
+
+// ---------- cards (characters, places) that can be peeked at from the page ----------
+export const cards = computed(() => cardIndex(rels.value.map((rel) => ({ rel, text: state.files[rel].buffer }))))
 
 // ---------- notes of the open file (the Notes list in the sidebar) ----------
 export const activeNotes = computed(() => {
@@ -437,6 +443,19 @@ export async function saveProjectAs() {
     toast('Saved a copy and switched to it: ' + data.root, 7000)
   } catch (e) {
     toast('Could not save a copy: ' + String(e.message || e))
+  }
+}
+
+// ---------- updates ----------
+// Asks GitHub for the newest release (only when you choose "Check for updates") and tells you the result.
+export async function checkForUpdates() {
+  try {
+    const r = await api.checkUpdate()
+    if (r.none) return toast(`You have version ${r.current}. No release has been published on GitHub yet.`, 7000)
+    if (!r.newer) return toast(`You have the newest version (${r.current}).`, 6000)
+    if (window.confirm(`Version ${r.latest} is available (you have ${r.current}).\n\nOpen the download page in your browser?`)) api.openReleases()
+  } catch (e) {
+    toast('Could not check for updates: ' + String(e.message || e).replace(/^Error invoking remote method '[^']*': (Error: )?/, ''), 7000)
   }
 }
 

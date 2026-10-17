@@ -13,7 +13,7 @@ import { ideaLineRange } from '@shared/ideas.mjs'
 import { prefs } from '../prefs.js'
 
 const props = defineProps({ modelValue: { type: String, default: '' } })
-const emit = defineEmits(['update:modelValue', 'selection', 'geometry', 'badge', 'action'])
+const emit = defineEmits(['update:modelValue', 'selection', 'geometry', 'badge', 'action', 'peek'])
 
 const host = ref(null)
 let view = null
@@ -348,6 +348,10 @@ onMounted(() => {
           mousedown: (e) => {
             const b = e.target && e.target.closest ? e.target.closest('.cm-badge') : null
             if (b) { emit('badge', Number(b.dataset.n)); return true }
+            if (e.altKey && view) {
+              const p = view.posAtCoords({ x: e.clientX, y: e.clientY })
+              if (p != null) { emit('peek', p); return true }
+            }
             const x = e.target && e.target.closest ? e.target.closest('.cm-idea-x') : null
             if (x && view) { dismissIdea(view.posAtDOM(x)); return true }
             return false

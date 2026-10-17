@@ -84,3 +84,11 @@ test('navigation pane menus: a heading, and the pane header', () => {
   assert.deepEqual(sent.pop(), { type: 'new-chapter' })
   assert.deepEqual(fileMenuTemplate('note', { rel: 'x.md' }, deps), [], 'notes pages no longer have a sidebar menu')
 })
+
+test('a card named under the click gets a Peek item first', () => {
+  const sent = []
+  const t = editorMenuTemplate(FLAGS, { send: (a) => sent.push(a) }, { editor: true, selection: false, card: { rel: 'Characters/Mo Lan.md', title: 'Mo Lan' } })
+  assert.equal(t[0].label, 'Peek at card: Mo Lan')
+  t[0].click()
+  assert.deepEqual(sent, [{ name: 'card-peek', rel: 'Characters/Mo Lan.md' }])
+})

@@ -40,6 +40,11 @@ const SAVE_TIPS = {
   conflict: 'A file was changed in two places. Open it and choose which version to keep.'
 }
 const saveTip = computed(() => SAVE_TIPS[saveState.value])
+// "Saved 14:02": the time of the last write, so you can see it is alive
+const saveLabel = computed(() => {
+  if (saveState.value !== 'saved' || !state.lastSaved) return SAVE_LABELS[saveState.value]
+  return 'Saved ' + new Date(state.lastSaved).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+})
 
 function onKey(e) {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveAll(); return }
@@ -84,7 +89,7 @@ onBeforeUnmount(() => {
       <ProjectMenu />
       <div class="spacer"></div>
       <button v-if="state.project" class="save-btn" :class="saveState" :title="saveTip" @click="saveAll">
-        <span class="sdot"></span><span>{{ SAVE_LABELS[saveState] }}</span>
+        <span class="sdot"></span><span>{{ saveLabel }}</span>
       </button>
       <button v-if="reviewCount" class="review-pill" title="Open the next file with changes waiting for your decision" @click="openNextReview">{{ reviewCount }} to review</button>
       <button v-if="reviewCount" class="review-all" title="Keep every outside edit that is waiting (files with a conflict are skipped)" @click="acceptAll">Keep all</button>

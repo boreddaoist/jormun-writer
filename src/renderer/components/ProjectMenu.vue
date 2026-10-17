@@ -3,7 +3,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const openKofi = () => window.jormun.openKofi()
 import {
-  state, pickProject, openRecent, openDialog, revealProject, reloadProject, saveAll, newChapter, saveProjectAs, mergeChapters, looseChapters
+  state, pickProject, openRecent, openDialog, revealProject, reloadProject, saveAll, newChapter, saveProjectAs, mergeChapters, looseChapters, checkForUpdates
 } from '../store.js'
 import { prefs, toggleSidebar } from '../prefs.js'
 import logo from '../assets/logo.webp'
@@ -80,6 +80,7 @@ const ICON = {
         <button class="menu-item" title="Re-read every file from disk" @click="reloadProject"><svg class="mi-ic" viewBox="0 0 16 16"><path :d="ICON.reload" /></svg>Reload from disk</button>
       </template>
       <div class="menu-sep"></div>
+      <button class="menu-item" title="Asks GitHub for the newest release (the only time the app goes online, and only when you click)" @click="checkForUpdates"><svg class="mi-ic" viewBox="0 0 16 16"><path :d="ICON.reload" /></svg>Check for updates</button>
       <button class="menu-item" title="Opens ko-fi.com/boredjun in your browser" @click="openKofi"><svg class="mi-ic" viewBox="0 0 16 16"><path :d="ICON.heart" /></svg>Support on Ko-fi</button>
     </div>
   </div>

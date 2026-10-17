@@ -5,6 +5,7 @@ import QuickOpenDialog from './QuickOpenDialog.vue'
 import ExportDialog from './ExportDialog.vue'
 import HistoryDialog from './HistoryDialog.vue'
 import FindDialog from './FindDialog.vue'
+import CardDialog from './CardDialog.vue'
 </script>
 
 <template>
@@ -13,4 +14,5 @@ import FindDialog from './FindDialog.vue'
   <ExportDialog v-else-if="state.dialog && state.dialog.type === 'export'" />
   <HistoryDialog v-else-if="state.dialog && state.dialog.type === 'history'" />
   <FindDialog v-else-if="state.dialog && state.dialog.type === 'find'" />
+  <CardDialog v-else-if="state.dialog && state.dialog.type === 'card'" />
 </template>

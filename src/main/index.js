@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, Menu, shell, clipboard } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, Menu, shell, clipboard, net } from 'electron'
 import { join, basename, dirname } from 'path'
 import { existsSync, readFileSync, writeFileSync, mkdirSync, statSync } from 'fs'
 import { spawn } from 'child_process'
@@ -7,6 +7,7 @@ import { editorMenuTemplate, fileMenuTemplate } from './contextmenu.js'
 import { createProject } from './scaffold.js'
 import { mergeManuscript, copyProject } from './manage.js'
 import { buildDocx, buildMarkdown } from './exporter.js'
+import { compareVersions } from '../shared/version.mjs'
 import aiInstructions from '../../docs/AI-INSTRUCTIONS.md?raw'
 import appIcon from '../../build/icon.png?asset'
 
@@ -225,6 +226,19 @@ function registerIpc() {
   })
   // The one outside link in the app (a fixed address, never a URL from the page).
   ipcMain.handle('app:kofi', () => shell.openExternal('https://ko-fi.com/boredjun'))
+  // The only other network use: asking GitHub for the newest release, and only when you click "Check for updates".
+  ipcMain.handle('app:check-update', async () => {
+    const current = app.getVersion()
+    const res = await net.fetch('https://api.github.com/repos/boreddaoist/jormun-writer/releases/latest', {
+      headers: { 'User-Agent': 'jormun-writer', Accept: 'application/vnd.github+json' }
+    })
+    if (res.status === 404) return { current, latest: '', newer: false, none: true }
+    if (!res.ok) throw new Error('GitHub answered ' + res.status)
+    const j = await res.json()
+    const latest = String(j.tag_name || '').replace(/^v/i, '')
+    return { current, latest, newer: !!latest && compareVersions(latest, current) > 0, none: false }
+  })
+  ipcMain.handle('app:open-releases', () => shell.openExternal('https://github.com/boreddaoist/jormun-writer/releases/latest'))
   ipcMain.handle('project:reveal', () => {
     if (project) shell.openPath(project.root)
     return !!project

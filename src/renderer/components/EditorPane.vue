@@ -8,7 +8,8 @@ import { stripComments } from '@shared/comments.mjs'
 import { findMatches } from '@shared/find.mjs'
 import { isIdeaLine } from '@shared/ideas.mjs'
 import { parseComments, addComment, addReply, resolveComment, editComment } from '@shared/comments.mjs'
-import { state, edit, save, titleOf, setNav, toast } from '../store.js'
+import { state, edit, save, titleOf, setNav, toast, cards, openDialog } from '../store.js'
+import { cardAt } from '@shared/cards.mjs'
 import { prefs, stepZoom } from '../prefs.js'
 import ReviewBar from './ReviewBar.vue'
 import Toolbar from './Toolbar.vue'
@@ -157,6 +158,7 @@ function onAction(action) {
   if (!ed) return
   if (action && typeof action === 'object') {
     if (action.name === 'idea-dismiss') { if (ideaPos != null) ed.dismissIdea(ideaPos); return }
+    if (action.name === 'card-peek') return openDialog('card', { rel: action.rel })
     return onNoteAction(action)
   }
   const name = action
@@ -226,6 +228,12 @@ function selectComment(c) {
   // put the caret at the start of the passage (not a selection of it, so typing never wipes the passage)
   const at = c.anchor ? c.anchorFrom : c.from
   live.value.select(at, at)
+}
+// Alt + click on a name: peek at its card
+function onPeek(pos) {
+  if (!live.value) return
+  const hit = cardAt(cards.value, live.value.getText(), pos)
+  if (hit) openDialog('card', { rel: hit.rel })
 }
 function onBadge(n) {
   const c = comments.value.find((x) => x.n === n)
@@ -310,7 +318,16 @@ function contextInfo(x, y) {
   const cur = note ? comments.value.find((x) => x.n === note) : null
   const onIdea = !!(el && el.closest && el.closest('.cm-idea'))
   ideaPos = onIdea && live.value ? live.value.posAtCoords(x, y) : null
-  return { editor: !!inEditor, note, color: cur ? cur.color : '', selection: !selInfo.value.empty, idea: ideaPos != null }
+  // a card named under the click
+  let card = null
+  if (inEditor && live.value) {
+    const at = live.value.posAtCoords(x, y)
+    if (at != null) {
+      const hit = cardAt(cards.value, live.value.getText(), at)
+      if (hit) card = { rel: hit.rel, title: hit.title }
+    }
+  }
+  return { editor: !!inEditor, note, color: cur ? cur.color : '', selection: !selInfo.value.empty, idea: ideaPos != null, card }
 }
 
 let offAction = null
@@ -383,6 +400,7 @@ const saveLabel = computed(() => {
               @selection="onSel"
               @geometry="bump"
               @badge="onBadge"
+              @peek="onPeek"
               @action="onAction"
             />
           </article>

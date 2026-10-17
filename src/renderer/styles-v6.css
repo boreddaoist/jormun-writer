@@ -219,3 +219,11 @@ button.review-all:hover { background: var(--panel-2); color: var(--text-strong);
 .hunk-btns { position: absolute; right: 6px; top: 3px; display: flex; gap: 4px; opacity: 0.85; transition: opacity 0.12s; }
 .hunk:hover .hunk-btns { opacity: 1; }
 .btn.mini { padding: 3px 10px; font-size: 12px; line-height: 1.2; }
+
+/* card peek */
+.card-peek { max-height: 60vh; overflow-y: auto; font-size: 14.5px; line-height: 1.55; }
+.card-peek h1 { display: none; }
+.card-peek h2 { font-size: 15px; margin: 16px 0 4px; color: var(--text-strong); }
+.card-peek h3 { font-size: 13.5px; margin: 12px 0 2px; color: var(--muted); }
+.card-peek p { margin: 4px 0 8px; }
+.card-peek blockquote { margin: 6px 0 10px; padding: 6px 12px; border-left: 2px solid var(--accent); background: var(--panel-2); border-radius: 0 6px 6px 0; }

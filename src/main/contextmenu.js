@@ -20,6 +20,12 @@ export function editorMenuTemplate(params, deps, ctx = {}) {
     t.push({ type: 'separator' })
   }
 
+  // A character or place card named under the click: read it without leaving the page.
+  if (ctx.editor && ctx.card) {
+    t.push({ label: 'Peek at card: ' + ctx.card.title, click: send({ name: 'card-peek', rel: ctx.card.rel }) })
+    t.push({ type: 'separator' })
+  }
+
   // Notes (Word's comments): add one to the selection, or edit / delete the one under the cursor.
   if (ctx.editor && ctx.idea) {
     t.push({ label: 'Dismiss rewrite idea', click: send({ name: 'idea-dismiss' }) })
