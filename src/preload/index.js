@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('jormun', {
   historyRead: (rel, id) => ipcRenderer.invoke('history:read', rel, id),
   historySnapshot: (rel, text, reason) => ipcRenderer.invoke('history:snapshot', rel, text, reason),
   closeNow: () => ipcRenderer.invoke('app:close-now'),
+  grammarWasm: () => ipcRenderer.invoke('grammar:wasm'),
   checkUpdate: () => ipcRenderer.invoke('app:check-update'),
   openReleases: () => ipcRenderer.invoke('app:open-releases'),
   openKofi: () => ipcRenderer.invoke('app:kofi'),

@@ -1,6 +1,6 @@
 {
   "name": "jormun-writer",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "private": true,
   "description": "Jormun Writer – a folder-of-Markdown novel writer that an AI can edit in VS Code while you keep writing",
   "main": "dist-electron/main/index.js",
@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "@codemirror/commands": "^6.11.1",
-    "@codemirror/search": "^6.7.2",
     "@codemirror/state": "^6.7.6",
     "@codemirror/view": "^6.43.14",
     "@fontsource/eb-garamond": "^5.3.0",
@@ -26,6 +25,7 @@
     "chokidar": "^3.6.0",
     "diff": "^5.2.0",
     "docx": "^9.11.0",
+    "harper.js": "^2.13.0",
     "vue": "^3.4.21"
   },
   "devDependencies": {
@@ -48,7 +48,8 @@
     "files": [
       "dist/**",
       "dist-electron/**",
-      "package.json"
+      "package.json",
+      "!node_modules/harper.js/**"
     ],
     "asar": true,
     "win": {
@@ -71,6 +72,12 @@
       "shortcutName": "Jormun Writer",
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico"
-    }
+    },
+    "extraResources": [
+      {
+        "from": "node_modules/harper.js/dist/harper_wasm_bg.wasm",
+        "to": "harper/harper_wasm_bg.wasm"
+      }
+    ]
   }
 }

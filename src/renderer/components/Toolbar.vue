@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { DIALECT_NAMES } from '../grammar.js'
 import { prefs, FONTS, LINE_HEIGHTS, WIDTHS, SIZE_MIN, SIZE_MAX, bumpSize, ACCENTS } from '../prefs.js'
 
 defineProps({
@@ -81,6 +82,14 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onDoc))
             ></button>
           </div>
         </div>
+        <label class="pop-check" title="Offline grammar suggestions, underlined softly. You always decide: right-click an underline to fix or ignore it.">
+          <input v-model="prefs.grammar" type="checkbox" /> Grammar suggestions
+        </label>
+        <label v-if="prefs.grammar" class="pop-row"><span>English</span>
+          <select v-model="prefs.dialect" class="tb-select">
+            <option v-for="d in DIALECT_NAMES" :key="d" :value="d">{{ d }}</option>
+          </select>
+        </label>
         <label class="pop-check" title="Off: ** # and note braces stay hidden, like in Word. On: they appear under the cursor.">
           <input v-model="prefs.reveal" type="checkbox" /> Show formatting marks
         </label>

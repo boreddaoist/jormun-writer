@@ -19,6 +19,13 @@ change appears in the app as a **keep / undo** diff, and your own typing is neve
 - **Notes in the margin, like Word comments.** Select a passage, right-click, add a note. The AI leaves its questions
   and suggestions the same way (marked **AI**) instead of rewriting your prose. You resolve them when you are done.
 - **Rewrite ideas, never rewrites.** When a paragraph could be stronger, the AI shows a proposed rewrite in yellow right under it. You read it, rewrite the paragraph your own way, and dismiss it with one click. It never touches your text and is never counted or exported.
+- **Review changes one by one.** An AI edit comes with Keep and Undo for each change (or Keep all), so you can take the good ones and drop the rest.
+- **Version history.** The app keeps earlier versions of every file and always saves one before and after an outside edit. Restore any of them, even a file that was deleted (`Ctrl+Shift+H`).
+- **Find and replace** in the chapter (`Ctrl+F`) and across the whole project (`Ctrl+Shift+F`), handy when a character is renamed.
+- **A Notes list** like Word's Review pane: filter by who wrote the note, see which ones wait for your answer, resolve one or many.
+- **Hide the notes and yellow ideas** with one click while you draft, and bring them back when you revise.
+- **Offline grammar suggestions** (soft blue underlines, powered by [Harper](https://writewithharper.com)): right-click to fix or ignore. Spelling stays with the built-in spell checker. Nothing leaves your computer.
+- **Peek at a character card** without leaving the page: right-click a name, or Alt+click it.
 - **The AI proposes, you decide.** Every outside edit is a diff you can keep or undo. If you are typing in the same
   place, the app asks which version to keep and nothing is lost.
 - **Live word count** at the bottom right ("2 of 149 words" while you have text selected), a clean dark interface, and fonts, size, line spacing and page width you can set.
@@ -26,7 +33,7 @@ change appears in the app as a **keep / undo** diff, and your own typing is neve
   the AI can read them to keep continuity, and git, Obsidian or any editor can open them too.
 - **Export to Word (.docx) or Markdown**, with your notes as real Word comments if you want them, ready to paste into your
   publishing platform.
-- **Works offline.** Nothing is uploaded; the app itself never connects to the internet (the *Support on Ko-fi* menu item only opens your browser).
+- **Works offline.** Nothing is uploaded and the app does not phone home. It goes online only when you click *Check for updates* (it asks GitHub for the newest release number) or *Support on Ko-fi* (opens your browser).
 
 > Early version, built for Windows and used for a real web novel. Bug reports and ideas are welcome as GitHub issues.
 

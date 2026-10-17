@@ -20,6 +20,17 @@ export function editorMenuTemplate(params, deps, ctx = {}) {
     t.push({ type: 'separator' })
   }
 
+  // A grammar suggestion under the click: the message, up to three fixes, and ignore.
+  if (ctx.editor && ctx.gram) {
+    const g = ctx.gram
+    t.push({ label: String(g.message).slice(0, 90), enabled: false })
+    for (const s of g.suggestions || []) {
+      t.push({ label: s === '' ? 'Remove it' : 'Replace with \u201c' + s + '\u201d', click: send({ name: 'gram-fix', from: g.from, to: g.to, text: s }) })
+    }
+    t.push({ label: 'Ignore this suggestion', click: send({ name: 'gram-ignore', key: g.key }) })
+    t.push({ type: 'separator' })
+  }
+
   // A character or place card named under the click: read it without leaving the page.
   if (ctx.editor && ctx.card) {
     t.push({ label: 'Peek at card: ' + ctx.card.title, click: send({ name: 'card-peek', rel: ctx.card.rel }) })

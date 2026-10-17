@@ -227,3 +227,6 @@ button.review-all:hover { background: var(--panel-2); color: var(--text-strong);
 .card-peek h3 { font-size: 13.5px; margin: 12px 0 2px; color: var(--muted); }
 .card-peek p { margin: 4px 0 8px; }
 .card-peek blockquote { margin: 6px 0 10px; padding: 6px 12px; border-left: 2px solid var(--accent); background: var(--panel-2); border-radius: 0 6px 6px 0; }
+
+/* grammar suggestions */
+.live-host .cm-editor .cm-gram { text-decoration: underline dotted #6aa8ff; text-decoration-thickness: 2px; text-underline-offset: 4px; }

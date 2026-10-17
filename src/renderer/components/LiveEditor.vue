@@ -37,6 +37,19 @@ const findField = StateField.define({
   provide: (f) => EditorView.decorations.from(f)
 })
 
+// ---------- grammar suggestions ----------
+// setGrammar() hands over the lints found for the current text; each one is an underline that carries its data, so a
+// right-click can offer the fixes and the underline follows edits.
+const setGramEffect = StateEffect.define()
+const gramField = StateField.define({
+  create: () => Decoration.none,
+  update(value, tr) {
+    for (const e of tr.effects) if (e.is(setGramEffect)) return e.value
+    return value.map(tr.changes)
+  },
+  provide: (f) => EditorView.decorations.from(f)
+})
+
 // ---------- widgets ----------
 class Badge extends WidgetType {
   constructor(n, ai, color) { super(); this.n = n; this.ai = ai; this.color = color }
@@ -344,6 +357,7 @@ onMounted(() => {
         revealComp.of(revealFacet.of(prefs.reveal)),
         livePlugin,
         findField,
+        gramField,
         EditorView.domEventHandlers({
           mousedown: (e) => {
             const b = e.target && e.target.closest ? e.target.closest('.cm-badge') : null
@@ -477,8 +491,25 @@ function replaceRanges(ranges, text) {
   if (!view || !ranges.length) return
   view.dispatch({ changes: ranges.map((r) => ({ from: r.from, to: r.to, insert: text })), userEvent: 'input.replace' })
 }
+function setGrammar(lints) {
+  if (!view) return
+  const len = view.state.doc.length
+  const marks = lints
+    .filter((l) => l.to > l.from && l.to <= len)
+    .map((l) => Decoration.mark({ class: 'cm-gram', attributes: { title: l.message }, lint: l }).range(l.from, l.to))
+  view.dispatch({ effects: setGramEffect.of(Decoration.set(marks, true)) })
+}
+// The suggestion under a position, with its current (edit-adjusted) range.
+function grammarAt(pos) {
+  if (!view) return null
+  let hit = null
+  view.state.field(gramField).between(pos, pos, (from, to, deco) => {
+    if (!hit || to - from < hit.to - hit.from) hit = { from, to, ...deco.spec.lint }
+  })
+  return hit
+}
 const posAtCoords = (x, y) => (view ? view.posAtCoords({ x, y }) : null)
-defineExpose({ setFind, reveal, replaceRanges, posAtCoords, dismissIdea, remeasure, getText, getSelection, apply, select, posTop, posEndX, focus, doUndo, doRedo, selectedText })
+defineExpose({ setGrammar, grammarAt, setFind, reveal, replaceRanges, posAtCoords, dismissIdea, remeasure, getText, getSelection, apply, select, posTop, posEndX, focus, doUndo, doRedo, selectedText })
 
 // Clicking the empty area below the text puts the cursor at the end.
 function onHostMouseDown(e) {

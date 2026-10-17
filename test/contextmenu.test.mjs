@@ -92,3 +92,13 @@ test('a card named under the click gets a Peek item first', () => {
   t[0].click()
   assert.deepEqual(sent, [{ name: 'card-peek', rel: 'Characters/Mo Lan.md' }])
 })
+
+test('a grammar suggestion shows its message, the fixes and Ignore, before anything else', () => {
+  const sent = []
+  const gram = { from: 4, to: 9, key: 'Typo|where', message: 'It looks like a typo, did you mean were?', suggestions: ['were', ''] }
+  const t = editorMenuTemplate(FLAGS, { send: (a) => sent.push(a) }, { editor: true, selection: false, gram })
+  assert.deepEqual(labels(t).slice(0, 5), ['It looks like a typo, did you mean were?', 'Replace with \u201cwere\u201d', 'Remove it', 'Ignore this suggestion', '---'])
+  assert.equal(t[0].enabled, false)
+  t[1].click(); t[3].click()
+  assert.deepEqual(sent, [{ name: 'gram-fix', from: 4, to: 9, text: 'were' }, { name: 'gram-ignore', key: 'Typo|where' }])
+})

@@ -239,6 +239,13 @@ function registerIpc() {
     return { current, latest, newer: !!latest && compareVersions(latest, current) > 0, none: false }
   })
   ipcMain.handle('app:open-releases', () => shell.openExternal('https://github.com/boreddaoist/jormun-writer/releases/latest'))
+  // The grammar engine (a WebAssembly file) is read from disk and handed to the page, so nothing is downloaded.
+  ipcMain.handle('grammar:wasm', () => {
+    const file = app.isPackaged
+      ? join(process.resourcesPath, 'harper', 'harper_wasm_bg.wasm')
+      : join(app.getAppPath(), 'node_modules', 'harper.js', 'dist', 'harper_wasm_bg.wasm')
+    return readFileSync(file)
+  })
   ipcMain.handle('project:reveal', () => {
     if (project) shell.openPath(project.root)
     return !!project

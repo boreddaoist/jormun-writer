@@ -10,6 +10,7 @@ import { isIdeaLine } from '@shared/ideas.mjs'
 import { parseComments, addComment, addReply, resolveComment, editComment } from '@shared/comments.mjs'
 import { state, edit, save, titleOf, setNav, toast, cards, openDialog } from '../store.js'
 import { cardAt } from '@shared/cards.mjs'
+import { lintText, isIgnored, ignoreLint } from '../grammar.js'
 import { prefs, stepZoom } from '../prefs.js'
 import ReviewBar from './ReviewBar.vue'
 import Toolbar from './Toolbar.vue'
@@ -159,6 +160,8 @@ function onAction(action) {
   if (action && typeof action === 'object') {
     if (action.name === 'idea-dismiss') { if (ideaPos != null) ed.dismissIdea(ideaPos); return }
     if (action.name === 'card-peek') return openDialog('card', { rel: action.rel })
+    if (action.name === 'gram-fix') return ed.replaceRanges([{ from: action.from, to: action.to }], action.text)
+    if (action.name === 'gram-ignore') { ignoreLint(action.key); gramTick.value++; return runGrammar() }
     return onNoteAction(action)
   }
   const name = action
@@ -240,6 +243,30 @@ function onBadge(n) {
   prefs.margin = true
   if (c) selectComment(c)
 }
+
+// ---- grammar suggestions: checked a moment after you stop typing, never changed without you ----
+let gramTimer = 0
+let gramRun = 0
+let gramFailed = false
+const gramTick = ref(0)
+async function runGrammar() {
+  const ed = live.value
+  if (!ed) return
+  if (!prefs.grammar) return ed.setGrammar([])
+  const text = body.value
+  const run = ++gramRun
+  try {
+    const lints = await lintText(text, prefs.dialect)
+    if (run !== gramRun || body.value !== text || !live.value) return // typed meanwhile: the next run will repaint
+    live.value.setGrammar(lints.filter((l) => !isIgnored(l)))
+  } catch (e) {
+    if (!gramFailed) { gramFailed = true; toast('Grammar suggestions are unavailable: ' + String(e.message || e).slice(0, 120), 7000) }
+  }
+}
+watch([body, () => prefs.grammar, () => prefs.dialect, gramTick], () => {
+  clearTimeout(gramTimer)
+  gramTimer = setTimeout(runGrammar, 900)
+})
 
 // ---- find bar (Ctrl+F) ----
 const findOpen = ref(false)
@@ -327,7 +354,14 @@ function contextInfo(x, y) {
       if (hit) card = { rel: hit.rel, title: hit.title }
     }
   }
-  return { editor: !!inEditor, note, color: cur ? cur.color : '', selection: !selInfo.value.empty, idea: ideaPos != null, card }
+  // a grammar suggestion under the click
+  let gram = null
+  if (inEditor && live.value && prefs.grammar) {
+    const at = live.value.posAtCoords(x, y)
+    const g = at != null ? live.value.grammarAt(at) : null
+    if (g) gram = { from: g.from, to: g.to, message: g.message, key: g.key, suggestions: g.suggestions.slice(0, 3) }
+  }
+  return { editor: !!inEditor, note, color: cur ? cur.color : '', selection: !selInfo.value.empty, idea: ideaPos != null, card, gram }
 }
 
 let offAction = null
@@ -336,6 +370,7 @@ onMounted(() => {
   offAction = window.jormun.onEditorAction((a) => onAction(a))
   window.__jwCtx = contextInfo
   window.addEventListener('jw:find', onFindEvent)
+  gramTimer = setTimeout(runGrammar, 600)
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', bump)
@@ -343,6 +378,7 @@ onBeforeUnmount(() => {
   if (window.__jwCtx === contextInfo) delete window.__jwCtx
   if (offAction) offAction()
   if (raf) cancelAnimationFrame(raf)
+  clearTimeout(gramTimer)
 })
 
 const saveLabel = computed(() => {
@@ -429,7 +465,7 @@ const saveLabel = computed(() => {
         :class="{ on: prefs.hideNotes }"
         :title="prefs.hideNotes ? 'Show the notes and rewrite ideas again' : 'Hide the notes and yellow rewrite ideas while you write'"
         @click="prefs.hideNotes = !prefs.hideNotes"
-      >{{ prefs.hideNotes ? 'Show notes and ideas' : 'Hide notes and ideas' }}<span class="annot-n">{{ comments.length }} notes · {{ ideaCount }} ideas</span></button>
+      >{{ prefs.hideNotes ? 'Show notes and ideas' : 'Hide notes and ideas' }}<span class="annot-n">{{ comments.length }} note{{ comments.length === 1 ? '' : 's' }} · {{ ideaCount }} idea{{ ideaCount === 1 ? '' : 's' }}</span></button>
       <div class="wordcount" title="Words in this document (notes are not counted)">
         <template v-if="selWords">{{ selWords.toLocaleString() }} of </template>{{ words.toLocaleString() }} words
       </div>

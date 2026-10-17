@@ -35,7 +35,7 @@ export const ACCENTS = {
 const KEY = 'jw.prefs'
 const defaults = {
   font: 'lato', size: 20, lineHeight: 1.7, width: 980, zoom: 100, sidebar: true, author: '', margin: true,
-  accent: 'ocean', sideTab: 'nav', hideNotes: false,
+  accent: 'ocean', sideTab: 'nav', hideNotes: false, grammar: true, dialect: 'American',
   reveal: false // show the Markdown marks (** # >) under the cursor; off = they stay hidden like in Word
 }
 
@@ -56,6 +56,8 @@ function load() {
     p.reveal = p.reveal === true
     p.sideTab = p.sideTab === 'notes' ? 'notes' : 'nav'
     p.hideNotes = p.hideNotes === true
+    p.grammar = p.grammar !== false
+    p.dialect = ['American', 'British', 'Australian', 'Canadian', 'Indian'].includes(p.dialect) ? p.dialect : 'American'
     return p
   } catch {
     return { ...defaults }
@@ -79,7 +81,7 @@ watchEffect(() => {
   try {
     localStorage.setItem(KEY, JSON.stringify({
       font: prefs.font, size: prefs.size, lineHeight: prefs.lineHeight, width: prefs.width, zoom: prefs.zoom, sidebar: prefs.sidebar,
-      author: prefs.author, margin: prefs.margin, accent: prefs.accent, reveal: prefs.reveal, sideTab: prefs.sideTab, hideNotes: prefs.hideNotes
+      author: prefs.author, margin: prefs.margin, accent: prefs.accent, reveal: prefs.reveal, sideTab: prefs.sideTab, hideNotes: prefs.hideNotes, grammar: prefs.grammar, dialect: prefs.dialect
     }))
   } catch { /* preferences are a convenience; the app works without storage */ }
 })
