@@ -2,6 +2,7 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import chokidar from 'chokidar'
 import { normalize } from '../shared/text.mjs'
+import { History } from './history.js'
 
 const IGNORE_DIRS = new Set(['node_modules', '.git', '.obsidian', '.jormun', '.claude', '.vscode'])
 const MAX_FILE_BYTES = 2 * 1024 * 1024
@@ -40,6 +41,12 @@ export class Project {
     this.emit = emit
     this.known = new Map() // rel -> last text seen on disk (read, written, or reported)
     this.watcher = null
+    this.history = new History(this.root)
+    this.sessionSnap = new Set() // files whose state at the start of this session is already in the history
+  }
+
+  async keep(rel, text, reason) {
+    try { await this.history.snapshot(rel, text, reason) } catch { /* history must never get in the way of writing */ }
   }
 
   async load() {
@@ -81,7 +88,13 @@ export class Project {
         const text = normalize(await fs.readFile(abs, 'utf8'))
         const had = this.known.has(rel)
         if (had && this.known.get(rel) === text) return // our own write, or no real change
+        const prev = this.known.get(rel)
         this.known.set(rel, text)
+        if (had) {
+          // keep both sides of an outside edit, so the version before it can always be brought back
+          await this.keep(rel, prev, 'before-outside-edit')
+          await this.keep(rel, text, 'outside-edit')
+        }
         this.emit({ type: had ? 'change' : 'add', rel, text })
       } catch { /* file vanished between event and read; unlink will follow */ }
     }
@@ -89,7 +102,9 @@ export class Project {
     this.watcher.on('unlink', (abs) => {
       const rel = toRel(this.root, abs)
       if (!rel.toLowerCase().endsWith('.md')) return
+      const last = this.known.get(rel)
       this.known.delete(rel)
+      if (last !== undefined) this.keep(rel, last, 'deleted')
       this.emit({ type: 'unlink', rel })
     })
   }
@@ -97,6 +112,12 @@ export class Project {
   async write(rel, text) {
     const abs = resolveInside(this.root, rel)
     const clean = normalize(text)
+    const prev = this.known.get(rel)
+    if (prev !== undefined && prev !== clean && !this.sessionSnap.has(rel)) {
+      this.sessionSnap.add(rel)
+      await this.keep(rel, prev, 'session-start') // how the file looked before this session changed it
+    }
+    await this.keep(rel, clean, 'autosave') // limited to one every few minutes
     this.known.set(rel, clean) // set first so the watcher treats the echo as ours
     await fs.mkdir(path.dirname(abs), { recursive: true })
     await fs.writeFile(abs, clean, 'utf8')

@@ -309,6 +309,22 @@ function registerIpc() {
     if (!project) throw new Error('No project open')
     return project.write(rel, text)
   })
+  // Version history of one file: list, read one version, store a snapshot (done before a restore).
+  ipcMain.handle('history:list', async (_e, rel) => {
+    if (!project) return []
+    resolveInside(project.root, rel)
+    return project.history.list(rel)
+  })
+  ipcMain.handle('history:read', async (_e, rel, id) => {
+    if (!project) throw new Error('No project open')
+    resolveInside(project.root, rel)
+    return project.history.read(rel, id)
+  })
+  ipcMain.handle('history:snapshot', async (_e, rel, text, reason) => {
+    if (!project) return null
+    resolveInside(project.root, rel)
+    return project.history.snapshot(rel, text, reason === 'before-restore' ? 'before-restore' : 'autosave')
+  })
   ipcMain.handle('file:create', (_e, rel, text) => {
     if (!project) throw new Error('No project open')
     return project.create(rel, text)

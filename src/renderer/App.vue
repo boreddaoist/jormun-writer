@@ -48,6 +48,7 @@ function onKey(e) {
   if (k === 'o') { e.preventDefault(); pickProject() }
   else if (k === 'p' && state.project) { e.preventDefault(); openDialog('quickOpen') }
   else if (k === 'n' && e.shiftKey) { e.preventDefault(); openDialog('newProject') }
+  else if (k === 'h' && e.shiftKey && state.active) { e.preventDefault(); openDialog('history', { rel: state.active }) }
   else if (k === 'n' && state.project) { e.preventDefault(); newChapter() }
   else if (e.key === '\\') { e.preventDefault(); toggleSidebar() }
   else if (e.key === '=' || e.key === '+') { e.preventDefault(); stepZoom(1) }

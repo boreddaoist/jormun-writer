@@ -298,6 +298,16 @@ export async function resolveConflict(rel, choice) {
   await save(rel)
 }
 
+// Bring back an older version from the history. The current text is stored in the history first, so a restore can be undone.
+export async function restoreVersion(rel, text) {
+  const f = state.files[rel]
+  if (!f) return
+  try { await api.historySnapshot(rel, f.buffer, 'before-restore') } catch { /* history is a safety net, not a gate */ }
+  edit(rel, text)
+  await save(rel, true)
+  toast('Restored an earlier version. The version you had before is in the history too.', 6000)
+}
+
 export async function restoreDeleted(rel) {
   const f = state.files[rel]
   if (!f) return
@@ -394,4 +404,4 @@ export function subscribe() {
 }
 
 // Test hook: lets the automated checks drive the same functions the menus call.
-if (typeof window !== 'undefined') window.__jwStore = { state, sectionOp, newChapter, mergeChapters, saveProjectAs, outline }
+if (typeof window !== 'undefined') window.__jwStore = { state, sectionOp, newChapter, mergeChapters, saveProjectAs, outline, edit, openDialog, restoreVersion }

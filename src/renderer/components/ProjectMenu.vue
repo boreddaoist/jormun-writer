@@ -30,6 +30,7 @@ const ICON = {
   merge: 'M3 3h5l1.5 1.5H13V8M3 3v9h4M9 10.5h5M11.5 8v5',
   heart: 'M8 13.5S2.5 10 2.5 6.2A2.9 2.9 0 0 1 8 5a2.9 2.9 0 0 1 5.5 1.2C13.5 10 8 13.5 8 13.5z',
   reload: 'M13 8a5 5 0 1 1-1.5-3.6M13 2.5v3h-3',
+  history: 'M8 2.5a5.5 5.5 0 1 1-5.2 3.7M2.5 2.5v3.7h3.7M8 5v3.2l2.2 1.3',
   sidebar: 'M2.5 3.5h11v9h-11zM6.5 3.5v9'
 }
 </script>
@@ -69,6 +70,7 @@ const ICON = {
       <template v-if="state.project">
         <div class="menu-sep"></div>
         <button v-if="looseChapters" class="menu-item" title="Put all chapter files into one Manuscript.md" @click="mergeChapters"><svg class="mi-ic" viewBox="0 0 16 16"><path :d="ICON.merge" /></svg>Merge chapters into one file…</button>
+        <button class="menu-item" :disabled="!state.active" title="Earlier versions of the open file" @click="openDialog('history', { rel: state.view === 'manuscript' && state.files['Manuscript.md'] ? 'Manuscript.md' : state.active })"><svg class="mi-ic" viewBox="0 0 16 16"><path :d="ICON.history" /></svg>Version history… <kbd>Ctrl+Shift+H</kbd></button>
         <button class="menu-item" @click="openDialog('export')"><svg class="mi-ic" viewBox="0 0 16 16"><path :d="ICON.export" /></svg>Export manuscript…</button>
         <button class="menu-item" @click="toggleSidebar"><svg class="mi-ic" viewBox="0 0 16 16"><path :d="ICON.sidebar" /></svg>{{ prefs.sidebar ? 'Hide' : 'Show' }} navigation <kbd>Ctrl+\</kbd></button>
         <div class="menu-sep"></div>
